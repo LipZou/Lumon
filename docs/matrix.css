@@ -1,0 +1,29 @@
+/* 二进制矩阵样式 */
+.matrix-cell {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    font-weight: bold !important;
+    color: #00ff00 !important; /* 绿色文字，类似Matrix电影风格 */
+}
+
+/* 0值样式 */
+.matrix-cell:contains("0") {
+    color: #004400 !important;
+    opacity: 0.7;
+}
+
+/* 1值样式 */  
+.matrix-cell:contains("1") {
+    color: #00ff00 !important;
+    text-shadow: 0 0 5px #00ff00;
+}
+
+/* 为矩阵区域添加轻微发光效果 */
+.matrix-cell:hover {
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3) !important;
+}
+
+/* 非矩阵区域的数字保持原样但颜色稍暗 */
+section div:not(.matrix-cell) {
+    color: rgba(255, 255, 255, 0.8);
+} 
