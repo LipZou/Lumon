@@ -81,17 +81,34 @@ function applyProportionalScaling() {
         contentWrapper.style.top = '50%';
         contentWrapper.style.transform = `translateY(-50%) scale(${scale})`;
         
-    } else if (isSmallScreen && !isPortrait) {
-        // Mobile landscape: fill height, width scales proportionally
-        scale = scaleY; // Fill height, maintain perfect aspect ratio
-        transformOrigin = 'center center';
-        strategy = 'mobile-landscape-height-fill-proportional';
+        // Allow scrolling in portrait if needed
+        document.body.style.overflow = 'auto';
         
-        // Reset to centered positioning
+    } else if (isSmallScreen && !isPortrait) {
+        // Mobile landscape: fill width but ensure no scrolling
+        const scaleForWidth = scaleX;
+        const heightAfterWidthScale = DESIGN_HEIGHT * scaleForWidth;
+        
+        if (heightAfterWidthScale <= screenHeight) {
+            // Width fill doesn't cause overflow - use it
+            scale = scaleForWidth;
+            strategy = 'mobile-landscape-width-fill-safe';
+        } else {
+            // Width fill would cause scrolling - use height fill instead
+            scale = scaleY;
+            strategy = 'mobile-landscape-height-fill-fallback';
+        }
+        
+        transformOrigin = 'center center';
+        
+        // Reset to centered positioning and prevent scrolling
         contentWrapper.style.position = 'relative';
         contentWrapper.style.left = 'auto';
         contentWrapper.style.top = 'auto';
         contentWrapper.style.transform = `scale(${scale})`;
+        
+        // Ensure no scrolling
+        document.body.style.overflow = 'hidden';
         
     } else {
         // PC: safe fit
@@ -104,6 +121,9 @@ function applyProportionalScaling() {
         contentWrapper.style.left = 'auto';
         contentWrapper.style.top = 'auto';
         contentWrapper.style.transform = `scale(${scale})`;
+        
+        // Allow normal scrolling on PC
+        document.body.style.overflow = 'auto';
     }
     
     // Set transform origin
