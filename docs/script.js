@@ -7,6 +7,26 @@ const MOUSE_EFFECT_RADIUS = 150; // pixels
 const MAX_SCALE_MULTIPLIER = 2.5;
 const MIN_SCALE_MULTIPLIER = 1.0;
 
+// Safari mobile viewport fix
+function setSafariViewportHeight() {
+    // Calculate the actual viewport height for Safari mobile
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    
+    // Force height recalculation on Safari
+    if (/Safari/.test(navigator.userAgent) && /Mobile/.test(navigator.userAgent)) {
+        document.body.style.height = `${window.innerHeight}px`;
+        
+        // Update section height for landscape mode
+        const section = document.querySelector('section');
+        if (section && window.innerWidth > window.innerHeight) {
+            const header = document.querySelector('header');
+            const headerHeight = header ? header.offsetHeight : 35;
+            section.style.height = `${window.innerHeight - headerHeight}px`;
+        }
+    }
+}
+
 // Get current grid size from CSS variables
 function getGridSize() {
     const section = document.querySelector('section');
@@ -339,6 +359,9 @@ function initializeMouseEvents() {
 
 // Reinitialize on window resize to handle orientation changes
 function handleResize() {
+    // Fix Safari viewport issues first
+    setSafariViewportHeight();
+    
     // Debounce resize events
     clearTimeout(window.resizeTimeout);
     window.resizeTimeout = setTimeout(() => {
@@ -353,6 +376,7 @@ function handleResize() {
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
+    setSafariViewportHeight();
     initializeGrid();
     initializeMouseEvents();
 });
@@ -363,7 +387,16 @@ window.addEventListener('resize', handleResize);
 // Force update after CSS loads
 window.addEventListener('load', () => {
     setTimeout(() => {
+        setSafariViewportHeight();
         initializeGrid();
         initializeMouseEvents();
+    }, 100);
+});
+
+// Handle orientation changes specifically for mobile Safari
+window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+        setSafariViewportHeight();
+        handleResize();
     }, 100);
 });
