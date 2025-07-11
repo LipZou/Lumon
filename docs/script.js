@@ -11,6 +11,195 @@ const MIN_SCALE_MULTIPLIER = 1.0;
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
 
+// Fullscreen functionality
+const fullscreenUtils = {
+    // Check if fullscreen is supported
+    isSupported() {
+        return !!(document.documentElement.requestFullscreen ||
+                 document.documentElement.webkitRequestFullscreen ||
+                 document.documentElement.mozRequestFullScreen ||
+                 document.documentElement.msRequestFullscreen);
+    },
+    
+    // Enter fullscreen
+    async enter() {
+        const element = document.documentElement;
+        try {
+            if (element.requestFullscreen) {
+                await element.requestFullscreen();
+            } else if (element.webkitRequestFullscreen) {
+                await element.webkitRequestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                await element.mozRequestFullScreen();
+            } else if (element.msRequestFullscreen) {
+                await element.msRequestFullscreen();
+            }
+            console.log('Entered fullscreen mode');
+            return true;
+        } catch (error) {
+            console.log('Failed to enter fullscreen:', error);
+            return false;
+        }
+    },
+    
+    // Exit fullscreen
+    async exit() {
+        try {
+            if (document.exitFullscreen) {
+                await document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                await document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                await document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                await document.msExitFullscreen();
+            }
+            console.log('Exited fullscreen mode');
+            return true;
+        } catch (error) {
+            console.log('Failed to exit fullscreen:', error);
+            return false;
+        }
+    },
+    
+    // Check if currently in fullscreen
+    isActive() {
+        return !!(document.fullscreenElement ||
+                 document.webkitFullscreenElement ||
+                 document.mozFullScreenElement ||
+                 document.msFullscreenElement);
+    },
+    
+    // Toggle fullscreen
+    async toggle() {
+        if (this.isActive()) {
+            return await this.exit();
+        } else {
+            return await this.enter();
+        }
+    }
+};
+
+// Mobile detection
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+}
+
+// Check if device is in landscape mode
+function isLandscape() {
+    return window.innerWidth > window.innerHeight;
+}
+
+// Create fullscreen button for mobile
+function createFullscreenButton() {
+    if (!isMobileDevice() || !fullscreenUtils.isSupported()) return;
+    
+    const button = document.createElement('button');
+    button.id = 'fullscreen-btn';
+    button.innerHTML = '⛶';
+    button.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: rgba(142, 227, 241, 0.2);
+        border: 2px solid #8EE3F1;
+        color: #8EE3F1;
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        font-size: 20px;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    `;
+    
+    // Update button appearance based on fullscreen state
+    function updateButton() {
+        if (fullscreenUtils.isActive()) {
+            button.innerHTML = '⛷';
+            button.title = 'Exit Fullscreen | 退出全屏';
+        } else {
+            button.innerHTML = '⛶';
+            button.title = 'Enter Fullscreen | 进入全屏';
+        }
+    }
+    
+    button.addEventListener('click', async () => {
+        await fullscreenUtils.toggle();
+        updateButton();
+        setTimeout(applyProportionalScaling, 100);
+    });
+    
+    // Listen for fullscreen changes
+    document.addEventListener('fullscreenchange', updateButton);
+    document.addEventListener('webkitfullscreenchange', updateButton);
+    document.addEventListener('mozfullscreenchange', updateButton);
+    document.addEventListener('MSFullscreenChange', updateButton);
+    
+    document.body.appendChild(button);
+    updateButton();
+    
+    console.log('Fullscreen button created');
+}
+
+// Auto-enter fullscreen on landscape for mobile
+async function handleOrientationForFullscreen() {
+    if (!isMobileDevice() || !fullscreenUtils.isSupported()) return;
+    
+    // Only auto-enter fullscreen, don't auto-exit to avoid annoyance
+    if (isLandscape() && !fullscreenUtils.isActive()) {
+        // Show a brief notification before entering fullscreen
+        showFullscreenTip();
+        
+        // Delay to let user read the tip
+        setTimeout(async () => {
+            const success = await fullscreenUtils.enter();
+            if (success) {
+                setTimeout(applyProportionalScaling, 100);
+            }
+        }, 1500);
+    }
+}
+
+// Show fullscreen tip
+function showFullscreenTip() {
+    const tip = document.createElement('div');
+    tip.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(8, 32, 58, 0.95);
+        border: 2px solid #8EE3F1;
+        color: #8EE3F1;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        z-index: 10001;
+        font-size: 16px;
+        max-width: 300px;
+        backdrop-filter: blur(10px);
+    `;
+    tip.innerHTML = `
+        <div>🌐 Entering fullscreen for better experience</div>
+        <div style="font-size: 14px; margin-top: 8px; opacity: 0.8;">正在进入全屏以获得更好体验</div>
+    `;
+    
+    document.body.appendChild(tip);
+    
+    // Remove tip after 2 seconds
+    setTimeout(() => {
+        if (tip.parentNode) {
+            tip.parentNode.removeChild(tip);
+        }
+    }, 2000);
+}
+
 // Calculate and apply proportional scaling
 function applyProportionalScaling() {
     const contentWrapper = document.querySelector('.content-wrapper');
@@ -347,11 +536,28 @@ function handleResize() {
     }, 100);
 }
 
+// Handle fullscreen state changes
+function handleFullscreenChange() {
+    console.log('Fullscreen state changed:', fullscreenUtils.isActive());
+    // Recalculate scaling when entering/exiting fullscreen
+    setTimeout(() => {
+        applyProportionalScaling();
+    }, 100);
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     initializeGrid();
     initializeMouseEvents();
     applyProportionalScaling();
+    createFullscreenButton(); // Initialize fullscreen button
+    handleOrientationForFullscreen(); // Handle orientation for fullscreen
+    
+    // Listen for fullscreen changes globally
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 });
 
 // Handle window resize and orientation changes
@@ -368,5 +574,6 @@ window.addEventListener('load', () => {
 window.addEventListener('orientationchange', () => {
     setTimeout(() => {
         applyProportionalScaling();
+        handleOrientationForFullscreen(); // Check if should enter fullscreen
     }, 100);
 });

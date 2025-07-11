@@ -60,6 +60,35 @@ body {
     }
 }
 
+/* Fullscreen mode optimizations */
+:fullscreen .main-container,
+:-webkit-full-screen .main-container,
+:-moz-full-screen .main-container,
+:-ms-fullscreen .main-container {
+    width: 100vw;
+    height: 100vh;
+}
+
+:fullscreen,
+:-webkit-full-screen,
+:-moz-full-screen,
+:-ms-fullscreen {
+    overflow: hidden;
+}
+
+/* Hide fullscreen button in fullscreen mode */
+:fullscreen #fullscreen-btn,
+:-webkit-full-screen #fullscreen-btn,
+:-moz-full-screen #fullscreen-btn,
+:-ms-fullscreen #fullscreen-btn {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    opacity: 0.8;
+}
+
 p {
     margin: 0;
 }
