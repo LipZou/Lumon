@@ -349,34 +349,111 @@ footer .code {
 
 section {
     width: 100vw;
-    height: calc(100vh - 160px);
+    height: calc(100vh - 120px);
     display: grid;
-    grid-template-columns: repeat(30, 1fr);
-    grid-template-rows: repeat(13, 1fr);
+    grid-template-columns: repeat(var(--grid-cols, 30), 1fr);
+    grid-template-rows: repeat(var(--grid-rows, 13), 1fr);
     margin-top: 80px;
-    overflow: visible;
-    gap: 1px;
-    padding: 10px;
+    overflow: hidden;
+    gap: max(1px, 0.1vw);
+    padding: min(2vw, 20px);
     justify-content: center;
     align-content: center;
     box-sizing: border-box;
+    --grid-cols: 20;
+    --grid-rows: 10;
 }
 
-@media only screen and (min-width: 1024px) {
+/* Mobile devices (portrait) */
+@media only screen and (max-width: 480px) {
+    body {
+        font-size: max(3vw, 14px);
+    }
+    
+    header {
+        font-size: max(2.5vw, 12px);
+    }
+    
+    .header-content {
+        padding: max(1vw, 4px);
+        margin: max(2vw, 10px) 0;
+    }
+    
     section {
-        grid-template-columns: repeat(30, 1fr);
-        grid-template-rows: repeat(13, 1fr);
-        padding: 15px;
-        height: calc(100vh - 180px);
+        --grid-cols: 15;
+        --grid-rows: 8;
+        height: calc(100vh - 100px);
+        margin-top: 60px;
+        padding: 2vw;
+        gap: max(0.5px, 0.1vw);
     }
 }
 
-@media only screen and (min-width: 1200px) {
+/* Mobile devices (landscape) */
+@media only screen and (max-width: 768px) and (orientation: landscape) {
     section {
-        grid-template-columns: repeat(30, 1fr);
-        grid-template-rows: repeat(13, 1fr);
-        padding: 20px;
+        --grid-cols: 25;
+        --grid-rows: 10;
+        height: calc(100vh - 80px);
+        margin-top: 50px;
+    }
+}
+
+/* Tablets (portrait) */
+@media only screen and (min-width: 481px) and (max-width: 768px) {
+    body {
+        font-size: max(2.5vw, 16px);
+    }
+    
+    section {
+        --grid-cols: 20;
+        --grid-rows: 12;
+        height: calc(100vh - 140px);
+        margin-top: 70px;
+        padding: 1.5vw;
+    }
+}
+
+/* Tablets (landscape) and small laptops */
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+    body {
+        font-size: max(2vw, 18px);
+    }
+    
+    section {
+        --grid-cols: 25;
+        --grid-rows: 13;
+        height: calc(100vh - 160px);
+        margin-top: 80px;
+        padding: 1.2vw;
+    }
+}
+
+/* Laptops and desktops */
+@media only screen and (min-width: 1025px) and (max-width: 1440px) {
+    section {
+        --grid-cols: 30;
+        --grid-rows: 13;
+        height: calc(100vh - 180px);
+        padding: 1vw;
+    }
+}
+
+/* Large desktops */
+@media only screen and (min-width: 1441px) {
+    section {
+        --grid-cols: 35;
+        --grid-rows: 15;
         height: calc(100vh - 200px);
+        padding: 0.8vw;
+    }
+}
+
+/* Ultra-wide screens */
+@media only screen and (min-width: 1920px) {
+    section {
+        --grid-cols: 40;
+        --grid-rows: 18;
     }
 }
 
@@ -385,7 +462,7 @@ section>div {
     align-items: center;
     justify-content: center;
     font-weight: 100;
-    font-size: 18px;
+    font-size: max(1.2vw, 10px);
     border: none;
     background: none;
     width: 100%;
@@ -394,26 +471,57 @@ section>div {
     box-sizing: border-box;
     line-height: 1;
     transition: transform 0.3s ease;
+    min-height: 0;
+    min-width: 0;
+}
+
+/* Responsive font sizes for grid items */
+@media only screen and (max-width: 480px) {
+    section>div {
+        font-size: max(2.5vw, 8px);
+    }
+}
+
+@media only screen and (min-width: 481px) and (max-width: 768px) {
+    section>div {
+        font-size: max(2vw, 10px);
+    }
+}
+
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+    section>div {
+        font-size: max(1.5vw, 12px);
+    }
+}
+
+@media only screen and (min-width: 1025px) {
+    section>div {
+        font-size: max(1.2vw, 14px);
+    }
 }
 
 section>div.matrix-bit {
     transform: scale(1.5);
     z-index: 100;
+    font-weight: 600;
 }
 
 section>div.matrix-bit.center {
     transform: scale(2.0);
     z-index: 101;
+    font-weight: 700;
 }
 
 section>div.matrix-bit.near-center {
     transform: scale(1.8);
     z-index: 100;
+    font-weight: 600;
 }
 
 section>div.matrix-bit.edge {
     transform: scale(1.3);
     z-index: 99;
+    font-weight: 500;
 }
 
 section>div.b-20 {
