@@ -335,34 +335,7 @@ function initializeMouseEvents() {
     console.log('Mouse and touch scaling events initialized');
 }
 
-// Create touch instruction overlay for mobile devices
-function createTouchInstruction() {
-    // Check if we're on a mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                     (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
-    
-    if (isMobile) {
-        // Create touch instruction element
-        const touchInstruction = document.createElement('div');
-        touchInstruction.className = 'touch-instruction';
-        touchInstruction.textContent = '👆 Touch and drag to scale numbers | 触摸并拖动来缩放数字';
-        
-        // Add to body
-        document.body.appendChild(touchInstruction);
-        
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-            touchInstruction.style.opacity = '0';
-            setTimeout(() => {
-                if (touchInstruction.parentNode) {
-                    touchInstruction.parentNode.removeChild(touchInstruction);
-                }
-            }, 1000);
-        }, 5000);
-        
-        console.log('Mobile touch instruction created');
-    }
-}
+
 
 // Reinitialize on window resize to handle orientation changes
 function handleResize() {
@@ -382,7 +355,6 @@ function handleResize() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeGrid();
     initializeMouseEvents();
-    createTouchInstruction();
 });
 
 // Reinitialize on window resize (for orientation changes, etc.)
@@ -393,6 +365,5 @@ window.addEventListener('load', () => {
     setTimeout(() => {
         initializeGrid();
         initializeMouseEvents();
-        createTouchInstruction();
     }, 100);
 });

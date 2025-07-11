@@ -28,32 +28,6 @@ body {
     touch-action: manipulation;
 }
 
-/* Mobile touch instruction overlay */
-.touch-instruction {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(142, 227, 241, 0.1);
-    border: 1px solid rgba(142, 227, 241, 0.3);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    color: #8EE3F1;
-    opacity: 0.7;
-    z-index: 1000;
-    display: none;
-    backdrop-filter: blur(10px);
-    animation: pulse 2s infinite;
-}
-
-/* Show touch instruction only on mobile devices */
-@media only screen and (max-width: 768px) and (pointer: coarse) {
-    .touch-instruction {
-        display: block;
-    }
-}
-
 /* Hide cursor on touch devices */
 @media (pointer: coarse) {
     body {
@@ -424,13 +398,45 @@ section {
     }
 }
 
-/* Mobile devices (landscape) */
-@media only screen and (max-width: 768px) and (orientation: landscape) {
+/* Small mobile devices (landscape) - phones like iPhone SE */
+@media only screen and (max-width: 667px) and (orientation: landscape) {
+    header {
+        font-size: max(1.8vw, 10px);
+    }
+    
+    .header-content {
+        padding: max(0.3vw, 2px);
+        margin: max(0.5vw, 5px) 0;
+    }
+    
     section {
-        --grid-cols: 25;
+        --grid-cols: 28;
         --grid-rows: 10;
-        height: calc(100vh - 80px);
-        margin-top: 50px;
+        height: calc(100vh - 45px);
+        margin-top: 25px;
+        padding: max(0.3vw, 2px);
+        gap: max(0.3px, 0.03vw);
+    }
+}
+
+/* Larger mobile devices (landscape) - phones like iPhone 12+ */
+@media only screen and (min-width: 668px) and (max-width: 768px) and (orientation: landscape) {
+    header {
+        font-size: max(2vw, 12px);
+    }
+    
+    .header-content {
+        padding: max(0.5vw, 3px);
+        margin: max(0.8vw, 6px) 0;
+    }
+    
+    section {
+        --grid-cols: 32;
+        --grid-rows: 12;
+        height: calc(100vh - 55px);
+        margin-top: 30px;
+        padding: max(0.4vw, 3px);
+        gap: max(0.4px, 0.04vw);
     }
 }
 
@@ -517,7 +523,14 @@ section>div {
     }
 }
 
-@media only screen and (min-width: 481px) and (max-width: 768px) {
+/* Mobile landscape font optimization */
+@media only screen and (max-width: 768px) and (orientation: landscape) {
+    section>div {
+        font-size: max(1.8vw, 8px);
+    }
+}
+
+@media only screen and (min-width: 481px) and (max-width: 768px) and (orientation: portrait) {
     section>div {
         font-size: max(2vw, 10px);
     }
@@ -688,14 +701,5 @@ section>div.du-8 {
     }
 }
 
-@keyframes pulse {
-    0%, 100% {
-        opacity: 0.7;
-        transform: translateX(-50%) scale(1);
-    }
-    50% {
-        opacity: 1;
-        transform: translateX(-50%) scale(1.05);
-    }
-}
+
 
