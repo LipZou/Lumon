@@ -21,18 +21,17 @@ const fullscreenUtils = {
                  document.documentElement.mozRequestFullScreen ||
                  document.documentElement.msRequestFullscreen);
         
-        // Check for iOS Safari specific support
+        // For iOS Safari, we always return true but will show manual instructions if needed
         const isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const hasWebkitSupport = !!document.documentElement.webkitRequestFullscreen;
         
         console.log('Fullscreen support check:', {
             standardSupport: standardSupport,
             isSafariIOS: isSafariIOS,
-            hasWebkitSupport: hasWebkitSupport,
             userAgent: navigator.userAgent
         });
         
-        return standardSupport || (isSafariIOS && hasWebkitSupport);
+        // Always allow fullscreen attempt on mobile devices
+        return standardSupport || isSafariIOS;
     },
     
     // iOS Safari specific fullscreen method
@@ -221,13 +220,12 @@ function isLandscape() {
     return window.innerWidth > window.innerHeight;
 }
 
-// Create fullscreen button for mobile (with improved visibility)
+// Create fullscreen button for mobile
 function createFullscreenButton() {
     console.log('Attempting to create fullscreen button...');
     console.log('isMobileDevice():', isMobileDevice());
-    console.log('fullscreenUtils.isSupported():', fullscreenUtils.isSupported());
     
-    // Always create button on mobile-like devices, even if fullscreen might not be supported
+    // Create button on mobile devices
     if (!isMobileDevice()) {
         console.log('Not creating button: not a mobile device');
         return;
@@ -287,16 +285,14 @@ function createFullscreenButton() {
         e.stopPropagation();
         console.log('Fullscreen button clicked');
         
-        if (fullscreenUtils.isSupported()) {
-            const success = await fullscreenUtils.toggle();
-            console.log('Fullscreen toggle result:', success);
+        const success = await fullscreenUtils.toggle();
+        console.log('Fullscreen toggle result:', success);
+        
+        if (success) {
             updateButton();
             setTimeout(applyProportionalScaling, 100);
-        } else {
-            // Fallback for unsupported browsers
-            console.log('Fullscreen not supported, showing tip');
-            showFullscreenTip('该浏览器不支持全屏功能');
         }
+        // Note: If fullscreen fails, fullscreenUtils.enter() will automatically show manual instructions for iOS
     });
     
     // Listen for fullscreen changes
@@ -321,49 +317,7 @@ function createFullscreenButton() {
     return button;
 }
 
-// Create a simple test button to verify mobile detection and visibility
-function createTestButton() {
-    console.log('Creating test button for debugging...');
-    
-    const testButton = document.createElement('div');
-    testButton.id = 'test-btn';
-    testButton.innerHTML = '🔍';
-    testButton.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        z-index: 999999;
-        background: rgba(255, 0, 0, 0.8);
-        border: 2px solid #ff0000;
-        color: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
-    `;
-    
-    testButton.addEventListener('click', () => {
-        console.log('Test button clicked!');
-        console.log('Screen size:', window.innerWidth, 'x', window.innerHeight);
-        console.log('User agent:', navigator.userAgent);
-        console.log('Touch points:', navigator.maxTouchPoints);
-        console.log('Is mobile:', isMobileDevice());
-        console.log('Fullscreen supported:', fullscreenUtils.isSupported());
-        
-        // Show info in a tip
-        showFullscreenTip(`测试按钮工作正常！屏幕: ${window.innerWidth}x${window.innerHeight}`);
-    });
-    
-    document.body.appendChild(testButton);
-    console.log('Test button created and added');
-    
-    return testButton;
-}
+
 
 // Auto-enter fullscreen on landscape for mobile
 async function handleOrientationForFullscreen() {
@@ -775,11 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeMouseEvents();
     applyProportionalScaling();
     
-    // Create test button for debugging visibility issues
-    console.log('Creating test button for debugging...');
-    createTestButton();
-    
-    // Create fullscreen button immediately for debugging
+    // Create fullscreen button immediately
     console.log('Creating fullscreen button on DOMContentLoaded...');
     createFullscreenButton();
     
@@ -804,9 +754,6 @@ window.addEventListener('resize', handleResize);
 window.addEventListener('load', () => {
     setTimeout(() => {
         applyProportionalScaling();
-        // Ensure button is created after everything loads
-        console.log('Creating fullscreen button after window load...');
-        createFullscreenButton();
     }, 100);
 });
 
