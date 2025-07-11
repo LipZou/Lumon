@@ -68,27 +68,31 @@ function applyProportionalScaling() {
     let transformOrigin = 'center center';
     let strategy = '';
     
-    // Simple mobile strategy: prioritize width on portrait
+    // Optimized mobile strategy based on user feedback
     if (isSmallScreen && isPortrait) {
-        // Mobile portrait: fill width completely
+        // Mobile portrait: fill width, center vertically
         scale = scaleX;
-        transformOrigin = 'left top';
-        strategy = 'mobile-portrait-width-priority';
+        transformOrigin = 'left center';
+        strategy = 'mobile-portrait-width-fill-center';
         
-        // Apply mobile-specific styles
+        // Apply mobile portrait styles - absolute positioning for width fill
         contentWrapper.style.position = 'absolute';
         contentWrapper.style.left = '0';
-        contentWrapper.style.top = '0';
-    } else if (isSmallScreen && !isPortrait) {
-        // Mobile landscape: fill height
-        scale = scaleY;
-        transformOrigin = 'center center';
-        strategy = 'mobile-landscape-height-priority';
+        contentWrapper.style.top = '50%';
+        contentWrapper.style.transform = `translateY(-50%) scale(${scale})`;
         
-        // Reset styles for landscape
+    } else if (isSmallScreen && !isPortrait) {
+        // Mobile landscape: use optimal fixed scale, center everything
+        scale = 0.45; // Fixed comfortable scale for mobile landscape
+        transformOrigin = 'center center';
+        strategy = 'mobile-landscape-fixed-optimal';
+        
+        // Reset to centered positioning
         contentWrapper.style.position = 'relative';
         contentWrapper.style.left = 'auto';
         contentWrapper.style.top = 'auto';
+        contentWrapper.style.transform = `scale(${scale})`;
+        
     } else {
         // PC: safe fit
         scale = Math.min(scaleX, scaleY) * 0.98;
@@ -99,18 +103,20 @@ function applyProportionalScaling() {
         contentWrapper.style.position = 'relative';
         contentWrapper.style.left = 'auto';
         contentWrapper.style.top = 'auto';
+        contentWrapper.style.transform = `scale(${scale})`;
     }
     
-    // Apply transform
-    contentWrapper.style.transform = `scale(${scale})`;
+    // Set transform origin
     contentWrapper.style.transformOrigin = transformOrigin;
     
-    // Force container styles for mobile portrait
+    // Force container styles
     const mainContainer = document.querySelector('.main-container');
     if (mainContainer && isSmallScreen && isPortrait) {
+        // Portrait: left align horizontally, center vertically
         mainContainer.style.justifyContent = 'flex-start';
-        mainContainer.style.alignItems = 'flex-start';
+        mainContainer.style.alignItems = 'center';
     } else if (mainContainer) {
+        // Landscape and PC: center everything
         mainContainer.style.justifyContent = 'center';
         mainContainer.style.alignItems = 'center';
     }
