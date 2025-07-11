@@ -43,61 +43,60 @@ function isMobileDevice() {
 
 
 
-// Calculate and apply intelligent scaling with perfect centering
+// Calculate and apply optimized scaling for different devices
 function applyProportionalScaling() {
     const contentWrapper = document.querySelector('.content-wrapper');
     if (!contentWrapper) return;
     
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
+    const isPortrait = screenHeight > screenWidth;
+    const isMobile = isMobileDevice();
     
     // Calculate scale ratios
     const scaleX = screenWidth / DESIGN_WIDTH;
     const scaleY = screenHeight / DESIGN_HEIGHT;
     
-    // Smart scaling strategy:
-    // - Landscape: prioritize filling width (if reasonable)
-    // - Portrait: prioritize filling height (if reasonable)
-    // - Always maintain aspect ratio
-    
     let scale;
     let strategy = '';
     
-    if (screenWidth >= screenHeight) {
-        // Landscape mode: try to fill width first, but don't exceed reasonable bounds
-        const maxScaleForHeight = screenHeight / DESIGN_HEIGHT;
-        const scaleForWidth = scaleX;
-        
-        if (scaleForWidth <= maxScaleForHeight * 1.1) {
-            // If filling width doesn't cause too much height overflow, use it
-            scale = scaleForWidth;
-            strategy = 'landscape-fill-width';
+    if (isMobile) {
+        // Mobile优化策略：充分利用屏幕空间
+        if (isPortrait) {
+            // 手机竖屏：优先填满宽度，提高空间利用率
+            // 但确保高度不会严重溢出（留一些缓冲）
+            const heightAfterWidthScale = DESIGN_HEIGHT * scaleX;
+            if (heightAfterWidthScale <= screenHeight * 1.05) {
+                scale = scaleX;
+                strategy = 'mobile-portrait-fill-width';
+            } else {
+                // 如果宽度优先会造成过多溢出，则完全适配
+                scale = Math.min(scaleX, scaleY);
+                strategy = 'mobile-portrait-fit-complete';
+            }
         } else {
-            // Otherwise, fit completely
-            scale = Math.min(scaleX, scaleY);
-            strategy = 'landscape-fit-complete';
+            // 手机横屏：优先填满高度
+            const widthAfterHeightScale = DESIGN_WIDTH * scaleY;
+            if (widthAfterHeightScale <= screenWidth * 1.05) {
+                scale = scaleY;
+                strategy = 'mobile-landscape-fill-height';
+            } else {
+                scale = Math.min(scaleX, scaleY);
+                strategy = 'mobile-landscape-fit-complete';
+            }
         }
     } else {
-        // Portrait mode: try to fill height first
-        const maxScaleForWidth = screenWidth / DESIGN_WIDTH;
-        const scaleForHeight = scaleY;
-        
-        if (scaleForHeight <= maxScaleForWidth * 1.1) {
-            // If filling height doesn't cause too much width overflow, use it
-            scale = scaleForHeight;
-            strategy = 'portrait-fill-height';
-        } else {
-            // Otherwise, fit completely
-            scale = Math.min(scaleX, scaleY);
-            strategy = 'portrait-fit-complete';
-        }
+        // PC端：确保完整显示，不允许任何溢出
+        scale = Math.min(scaleX, scaleY);
+        strategy = isPortrait ? 'pc-portrait-fit-complete' : 'pc-landscape-fit-complete';
     }
     
     // Apply the scale transform with perfect centering
     contentWrapper.style.transform = `scale(${scale})`;
     contentWrapper.style.transformOrigin = 'center center';
     
-    console.log(`Applied intelligent scaling: ${scale.toFixed(3)} (${strategy})`);
+    console.log(`Applied optimized scaling: ${scale.toFixed(3)} (${strategy})`);
+    console.log(`Device: ${isMobile ? 'Mobile' : 'PC'}, Orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`);
     console.log(`Screen: ${screenWidth}x${screenHeight}, Design: ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
     console.log(`Scale ratios - X: ${scaleX.toFixed(3)}, Y: ${scaleY.toFixed(3)}`);
 }
