@@ -11,20 +11,66 @@ const MIN_SCALE_MULTIPLIER = 1.0;
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
 
-// Fullscreen functionality
+// Fullscreen functionality with iOS Safari support
 const fullscreenUtils = {
     // Check if fullscreen is supported
     isSupported() {
-        return !!(document.documentElement.requestFullscreen ||
+        // Check for standard Fullscreen API
+        const standardSupport = !!(document.documentElement.requestFullscreen ||
                  document.documentElement.webkitRequestFullscreen ||
                  document.documentElement.mozRequestFullScreen ||
                  document.documentElement.msRequestFullscreen);
+        
+        // Check for iOS Safari specific support
+        const isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const hasWebkitSupport = !!document.documentElement.webkitRequestFullscreen;
+        
+        console.log('Fullscreen support check:', {
+            standardSupport: standardSupport,
+            isSafariIOS: isSafariIOS,
+            hasWebkitSupport: hasWebkitSupport,
+            userAgent: navigator.userAgent
+        });
+        
+        return standardSupport || (isSafariIOS && hasWebkitSupport);
     },
     
-    // Enter fullscreen
+    // iOS Safari specific fullscreen method
+    async enterIOS() {
+        try {
+            const element = document.documentElement;
+            if (element.webkitRequestFullscreen) {
+                await element.webkitRequestFullscreen();
+                return true;
+            } else if (element.webkitEnterFullscreen) {
+                await element.webkitEnterFullscreen();
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.log('iOS fullscreen failed:', error);
+            return false;
+        }
+    },
+    
+    // Enter fullscreen with iOS support
     async enter() {
         const element = document.documentElement;
+        
+        // Detect iOS Safari
+        const isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
         try {
+            if (isSafariIOS) {
+                // Try iOS specific methods first
+                if (element.webkitRequestFullscreen) {
+                    await element.webkitRequestFullscreen();
+                    console.log('Entered fullscreen using webkit (iOS)');
+                    return true;
+                }
+            }
+            
+            // Standard methods
             if (element.requestFullscreen) {
                 await element.requestFullscreen();
             } else if (element.webkitRequestFullscreen) {
@@ -33,11 +79,21 @@ const fullscreenUtils = {
                 await element.mozRequestFullScreen();
             } else if (element.msRequestFullscreen) {
                 await element.msRequestFullscreen();
+            } else {
+                throw new Error('No fullscreen method available');
             }
+            
             console.log('Entered fullscreen mode');
             return true;
         } catch (error) {
             console.log('Failed to enter fullscreen:', error);
+            
+            // Fallback: Show manual instructions for iOS
+            if (isSafariIOS) {
+                this.showManualFullscreenInstructions();
+                return false;
+            }
+            
             return false;
         }
     },
@@ -68,6 +124,64 @@ const fullscreenUtils = {
                  document.webkitFullscreenElement ||
                  document.mozFullScreenElement ||
                  document.msFullscreenElement);
+    },
+    
+    // Show manual fullscreen instructions for iOS
+    showManualFullscreenInstructions() {
+        const instructions = document.createElement('div');
+        instructions.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(8, 32, 58, 0.95);
+            color: #8EE3F1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            font-size: 18px;
+            line-height: 1.6;
+        `;
+        
+        instructions.innerHTML = `
+            <div style="max-width: 400px;">
+                <div style="font-size: 48px; margin-bottom: 20px;">📱</div>
+                <div style="font-size: 24px; margin-bottom: 20px; color: #ffffff;">手动进入全屏模式</div>
+                <div style="margin-bottom: 30px;">
+                    在Safari中，点击地址栏右侧的<br/>
+                    <strong style="color: #8EE3F1;">分享按钮 📤</strong><br/>
+                    然后选择<br/>
+                    <strong style="color: #8EE3F1;">"添加到主屏幕"</strong>
+                </div>
+                <div style="margin-bottom: 30px; font-size: 16px; opacity: 0.8;">
+                    或者将手机横屏并隐藏地址栏<br/>
+                    获得更好的全屏体验
+                </div>
+                <button id="close-instructions" style="
+                    background: rgba(142, 227, 241, 0.3);
+                    border: 2px solid #8EE3F1;
+                    color: #8EE3F1;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    touch-action: manipulation;
+                ">我知道了</button>
+            </div>
+        `;
+        
+        const closeButton = instructions.querySelector('#close-instructions');
+        closeButton.addEventListener('click', () => {
+            document.body.removeChild(instructions);
+        });
+        
+        document.body.appendChild(instructions);
     },
     
     // Toggle fullscreen
