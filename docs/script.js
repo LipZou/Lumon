@@ -13,22 +13,30 @@ const DESIGN_HEIGHT = 1080;
 
 
 
-// Mobile detection (improved)
+// More accurate mobile detection
 function isMobileDevice() {
-    // More comprehensive mobile detection
+    // Primary detection: User Agent
     const userAgent = navigator.userAgent.toLowerCase();
     const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|phone|tablet/i.test(userAgent);
-    const hasTouchPoints = navigator.maxTouchPoints && navigator.maxTouchPoints > 0;
-    const isSmallScreen = window.innerWidth <= 1024;
     
-    const result = isMobileUA || hasTouchPoints || isSmallScreen;
+    // Secondary detection: Touch capability (but exclude laptop touchscreens)
+    const hasTouchPoints = navigator.maxTouchPoints && navigator.maxTouchPoints > 1;
+    
+    // Only use screen size as fallback for genuine mobile devices
+    // Don't use screen size alone to avoid misclassifying resized desktop browsers
+    const isMobileSize = window.innerWidth <= 768 && window.innerHeight <= 1024;
+    
+    // More conservative detection: prioritize UA and touch, only use size as confirmation
+    const result = isMobileUA || (hasTouchPoints && isMobileSize);
+    
     console.log('Mobile detection:', {
         userAgent: userAgent,
         isMobileUA: isMobileUA,
         hasTouchPoints: hasTouchPoints,
         touchPoints: navigator.maxTouchPoints,
         screenWidth: window.innerWidth,
-        isSmallScreen: isSmallScreen,
+        screenHeight: window.innerHeight,
+        isMobileSize: isMobileSize,
         result: result
     });
     
@@ -61,23 +69,28 @@ function applyProportionalScaling() {
     let strategy = '';
     
     if (isMobile) {
-        // Mobile优化策略：充分利用屏幕空间
+        // Mobile优化策略：最大化利用屏幕空间
         if (isPortrait) {
-            // 手机竖屏：优先填满宽度，提高空间利用率
-            // 但确保高度不会严重溢出（留一些缓冲）
+            // 手机竖屏：强制填满宽度，更激进的策略
+            // 允许更多的高度溢出，只要不超过20%就接受
             const heightAfterWidthScale = DESIGN_HEIGHT * scaleX;
-            if (heightAfterWidthScale <= screenHeight * 1.05) {
+            const heightOverflow = heightAfterWidthScale / screenHeight;
+            
+            if (heightOverflow <= 1.20) {
+                // 优先使用宽度填满策略，允许20%的高度溢出
                 scale = scaleX;
-                strategy = 'mobile-portrait-fill-width';
+                strategy = 'mobile-portrait-fill-width-aggressive';
             } else {
-                // 如果宽度优先会造成过多溢出，则完全适配
+                // 只有在严重溢出时才完全适配
                 scale = Math.min(scaleX, scaleY);
                 strategy = 'mobile-portrait-fit-complete';
             }
         } else {
             // 手机横屏：优先填满高度
             const widthAfterHeightScale = DESIGN_WIDTH * scaleY;
-            if (widthAfterHeightScale <= screenWidth * 1.05) {
+            const widthOverflow = widthAfterHeightScale / screenWidth;
+            
+            if (widthOverflow <= 1.15) {
                 scale = scaleY;
                 strategy = 'mobile-landscape-fill-height';
             } else {
@@ -86,9 +99,15 @@ function applyProportionalScaling() {
             }
         }
     } else {
-        // PC端：确保完整显示，不允许任何溢出
+        // PC端：绝对保证完整显示，零溢出政策
+        // 无论全屏还是窗口模式，都要确保内容完整可见
         scale = Math.min(scaleX, scaleY);
-        strategy = isPortrait ? 'pc-portrait-fit-complete' : 'pc-landscape-fit-complete';
+        
+        // 为PC端添加额外的安全边距，确保header完全可见
+        const safetyMargin = 0.98; // 留2%安全边距
+        scale = scale * safetyMargin;
+        
+        strategy = isPortrait ? 'pc-portrait-safe-fit' : 'pc-landscape-safe-fit';
     }
     
     // Apply the scale transform with perfect centering
@@ -99,6 +118,7 @@ function applyProportionalScaling() {
     console.log(`Device: ${isMobile ? 'Mobile' : 'PC'}, Orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`);
     console.log(`Screen: ${screenWidth}x${screenHeight}, Design: ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
     console.log(`Scale ratios - X: ${scaleX.toFixed(3)}, Y: ${scaleY.toFixed(3)}`);
+    console.log(`Height overflow (mobile portrait): ${isMobile && isPortrait ? (DESIGN_HEIGHT * scaleX / screenHeight * 100).toFixed(1) + '%' : 'N/A'}`);
 }
 
 // Generate random number between 2-9
