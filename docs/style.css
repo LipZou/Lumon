@@ -42,6 +42,19 @@ body {
     overflow: hidden;
 }
 
+/* Mobile optimization: allow content to fill width */
+@media (max-width: 900px), (max-height: 900px) {
+    .main-container {
+        justify-content: flex-start;
+        align-items: center;
+    }
+    
+    .content-wrapper {
+        margin: 0;
+        transform-origin: left center;
+    }
+}
+
 /* Content wrapper with fixed PC proportions */
 .content-wrapper {
     width: 1920px;

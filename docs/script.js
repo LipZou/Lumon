@@ -121,9 +121,16 @@ function applyProportionalScaling() {
         strategy = isPortrait ? 'pc-portrait-safe-fit' : 'pc-landscape-safe-fit';
     }
     
-    // Apply the scale transform with perfect centering
+    // Apply the scale transform with device-specific centering
     contentWrapper.style.transform = `scale(${scale})`;
-    contentWrapper.style.transformOrigin = 'center center';
+    
+    if (isMobile && isPortrait) {
+        // Mobile portrait: scale from left center to fill width properly
+        contentWrapper.style.transformOrigin = 'left center';
+    } else {
+        // PC and mobile landscape: normal center scaling
+        contentWrapper.style.transformOrigin = 'center center';
+    }
     
     // Enhanced debug output
     console.warn('🎯 SCALING APPLIED:', {
