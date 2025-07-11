@@ -80,10 +80,26 @@ const fullscreenUtils = {
     }
 };
 
-// Mobile detection
+// Mobile detection (improved)
 function isMobileDevice() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-           (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+    // More comprehensive mobile detection
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|phone|tablet/i.test(userAgent);
+    const hasTouchPoints = navigator.maxTouchPoints && navigator.maxTouchPoints > 0;
+    const isSmallScreen = window.innerWidth <= 1024;
+    
+    const result = isMobileUA || hasTouchPoints || isSmallScreen;
+    console.log('Mobile detection:', {
+        userAgent: userAgent,
+        isMobileUA: isMobileUA,
+        hasTouchPoints: hasTouchPoints,
+        touchPoints: navigator.maxTouchPoints,
+        screenWidth: window.innerWidth,
+        isSmallScreen: isSmallScreen,
+        result: result
+    });
+    
+    return result;
 }
 
 // Check if device is in landscape mode
@@ -91,9 +107,23 @@ function isLandscape() {
     return window.innerWidth > window.innerHeight;
 }
 
-// Create fullscreen button for mobile
+// Create fullscreen button for mobile (with improved visibility)
 function createFullscreenButton() {
-    if (!isMobileDevice() || !fullscreenUtils.isSupported()) return;
+    console.log('Attempting to create fullscreen button...');
+    console.log('isMobileDevice():', isMobileDevice());
+    console.log('fullscreenUtils.isSupported():', fullscreenUtils.isSupported());
+    
+    // Always create button on mobile-like devices, even if fullscreen might not be supported
+    if (!isMobileDevice()) {
+        console.log('Not creating button: not a mobile device');
+        return;
+    }
+    
+    // Remove existing button if any
+    const existingButton = document.getElementById('fullscreen-btn');
+    if (existingButton) {
+        existingButton.remove();
+    }
     
     const button = document.createElement('button');
     button.id = 'fullscreen-btn';
@@ -102,8 +132,8 @@ function createFullscreenButton() {
         position: fixed;
         top: 20px;
         right: 20px;
-        z-index: 10000;
-        background: rgba(142, 227, 241, 0.2);
+        z-index: 999999;
+        background: rgba(142, 227, 241, 0.3);
         border: 2px solid #8EE3F1;
         color: #8EE3F1;
         width: 50px;
@@ -116,6 +146,9 @@ function createFullscreenButton() {
         align-items: center;
         justify-content: center;
         transition: all 0.3s ease;
+        box-shadow: 0 0 10px rgba(142, 227, 241, 0.5);
+        -webkit-backdrop-filter: blur(10px);
+        touch-action: manipulation;
     `;
     
     // Update button appearance based on fullscreen state
@@ -123,16 +156,33 @@ function createFullscreenButton() {
         if (fullscreenUtils.isActive()) {
             button.innerHTML = '⛷';
             button.title = 'Exit Fullscreen | 退出全屏';
+            button.style.background = 'rgba(255, 100, 100, 0.3)';
+            button.style.borderColor = '#ff6464';
+            button.style.color = '#ff6464';
         } else {
             button.innerHTML = '⛶';
             button.title = 'Enter Fullscreen | 进入全屏';
+            button.style.background = 'rgba(142, 227, 241, 0.3)';
+            button.style.borderColor = '#8EE3F1';
+            button.style.color = '#8EE3F1';
         }
     }
     
-    button.addEventListener('click', async () => {
-        await fullscreenUtils.toggle();
-        updateButton();
-        setTimeout(applyProportionalScaling, 100);
+    button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Fullscreen button clicked');
+        
+        if (fullscreenUtils.isSupported()) {
+            const success = await fullscreenUtils.toggle();
+            console.log('Fullscreen toggle result:', success);
+            updateButton();
+            setTimeout(applyProportionalScaling, 100);
+        } else {
+            // Fallback for unsupported browsers
+            console.log('Fullscreen not supported, showing tip');
+            showFullscreenTip('该浏览器不支持全屏功能');
+        }
     });
     
     // Listen for fullscreen changes
@@ -141,10 +191,64 @@ function createFullscreenButton() {
     document.addEventListener('mozfullscreenchange', updateButton);
     document.addEventListener('MSFullscreenChange', updateButton);
     
+    // Ensure button is added to body and visible
     document.body.appendChild(button);
     updateButton();
     
-    console.log('Fullscreen button created');
+    // Force show button after intro animation
+    setTimeout(() => {
+        button.style.display = 'flex';
+        button.style.opacity = '1';
+    }, 5000); // After intro animation completes
+    
+    console.log('Fullscreen button created and added to DOM');
+    console.log('Button element:', button);
+    
+    return button;
+}
+
+// Create a simple test button to verify mobile detection and visibility
+function createTestButton() {
+    console.log('Creating test button for debugging...');
+    
+    const testButton = document.createElement('div');
+    testButton.id = 'test-btn';
+    testButton.innerHTML = '🔍';
+    testButton.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 999999;
+        background: rgba(255, 0, 0, 0.8);
+        border: 2px solid #ff0000;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+    `;
+    
+    testButton.addEventListener('click', () => {
+        console.log('Test button clicked!');
+        console.log('Screen size:', window.innerWidth, 'x', window.innerHeight);
+        console.log('User agent:', navigator.userAgent);
+        console.log('Touch points:', navigator.maxTouchPoints);
+        console.log('Is mobile:', isMobileDevice());
+        console.log('Fullscreen supported:', fullscreenUtils.isSupported());
+        
+        // Show info in a tip
+        showFullscreenTip(`测试按钮工作正常！屏幕: ${window.innerWidth}x${window.innerHeight}`);
+    });
+    
+    document.body.appendChild(testButton);
+    console.log('Test button created and added');
+    
+    return testButton;
 }
 
 // Auto-enter fullscreen on landscape for mobile
@@ -167,7 +271,7 @@ async function handleOrientationForFullscreen() {
 }
 
 // Show fullscreen tip
-function showFullscreenTip() {
+function showFullscreenTip(customMessage = null) {
     const tip = document.createElement('div');
     tip.style.cssText = `
         position: fixed;
@@ -180,24 +284,30 @@ function showFullscreenTip() {
         padding: 20px;
         border-radius: 10px;
         text-align: center;
-        z-index: 10001;
+        z-index: 999999;
         font-size: 16px;
         max-width: 300px;
         backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     `;
-    tip.innerHTML = `
-        <div>🌐 Entering fullscreen for better experience</div>
-        <div style="font-size: 14px; margin-top: 8px; opacity: 0.8;">正在进入全屏以获得更好体验</div>
-    `;
+    
+    if (customMessage) {
+        tip.innerHTML = `<div>🌐 ${customMessage}</div>`;
+    } else {
+        tip.innerHTML = `
+            <div>🌐 Entering fullscreen for better experience</div>
+            <div style="font-size: 14px; margin-top: 8px; opacity: 0.8;">正在进入全屏以获得更好体验</div>
+        `;
+    }
     
     document.body.appendChild(tip);
     
-    // Remove tip after 2 seconds
+    // Remove tip after 3 seconds
     setTimeout(() => {
         if (tip.parentNode) {
             tip.parentNode.removeChild(tip);
         }
-    }, 2000);
+    }, 3000);
 }
 
 // Calculate and apply proportional scaling
@@ -550,8 +660,21 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeGrid();
     initializeMouseEvents();
     applyProportionalScaling();
-    createFullscreenButton(); // Initialize fullscreen button
-    handleOrientationForFullscreen(); // Handle orientation for fullscreen
+    
+    // Create test button for debugging visibility issues
+    console.log('Creating test button for debugging...');
+    createTestButton();
+    
+    // Create fullscreen button immediately for debugging
+    console.log('Creating fullscreen button on DOMContentLoaded...');
+    createFullscreenButton();
+    
+    // Create button again after intro animation to ensure visibility
+    setTimeout(() => {
+        console.log('Creating fullscreen button after intro delay...');
+        createFullscreenButton();
+        handleOrientationForFullscreen();
+    }, 5000);
     
     // Listen for fullscreen changes globally
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -567,6 +690,9 @@ window.addEventListener('resize', handleResize);
 window.addEventListener('load', () => {
     setTimeout(() => {
         applyProportionalScaling();
+        // Ensure button is created after everything loads
+        console.log('Creating fullscreen button after window load...');
+        createFullscreenButton();
     }, 100);
 });
 
