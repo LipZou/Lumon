@@ -50,7 +50,7 @@ function isMobileDevice() {
 
 
 
-// Calculate and apply optimized scaling for different devices
+// Simple and effective mobile-first scaling
 function applyProportionalScaling() {
     const contentWrapper = document.querySelector('.content-wrapper');
     if (!contentWrapper) return;
@@ -58,59 +58,66 @@ function applyProportionalScaling() {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     const isPortrait = screenHeight > screenWidth;
-    const isMobile = isMobileDevice();
+    const isSmallScreen = screenWidth <= 768; // Simple mobile detection
     
     // Calculate scale ratios
     const scaleX = screenWidth / DESIGN_WIDTH;
     const scaleY = screenHeight / DESIGN_HEIGHT;
     
     let scale;
+    let transformOrigin = 'center center';
     let strategy = '';
     
-
-    
-    if (isMobile) {
-        // Mobile优化策略：最大化利用屏幕空间
-        if (isPortrait) {
-            // 手机竖屏：强制填满宽度，完全忽略高度溢出
-            // 直接使用scaleX，不管会溢出多少
-            scale = scaleX;
-            strategy = 'mobile-portrait-force-fill-width';
-        } else {
-            // 手机横屏：优先填满高度
-            scale = scaleY;
-            strategy = 'mobile-landscape-fill-height';
-        }
+    // Simple mobile strategy: prioritize width on portrait
+    if (isSmallScreen && isPortrait) {
+        // Mobile portrait: fill width completely
+        scale = scaleX;
+        transformOrigin = 'left top';
+        strategy = 'mobile-portrait-width-priority';
+        
+        // Apply mobile-specific styles
+        contentWrapper.style.position = 'absolute';
+        contentWrapper.style.left = '0';
+        contentWrapper.style.top = '0';
+    } else if (isSmallScreen && !isPortrait) {
+        // Mobile landscape: fill height
+        scale = scaleY;
+        transformOrigin = 'center center';
+        strategy = 'mobile-landscape-height-priority';
+        
+        // Reset styles for landscape
+        contentWrapper.style.position = 'relative';
+        contentWrapper.style.left = 'auto';
+        contentWrapper.style.top = 'auto';
     } else {
-        // PC端：绝对保证完整显示，零溢出政策
-        scale = Math.min(scaleX, scaleY);
+        // PC: safe fit
+        scale = Math.min(scaleX, scaleY) * 0.98;
+        transformOrigin = 'center center';
+        strategy = 'pc-safe-fit';
         
-        // 为PC端添加额外的安全边距，确保header完全可见
-        const safetyMargin = 0.98; // 留2%安全边距
-        scale = scale * safetyMargin;
-        
-        strategy = isPortrait ? 'pc-portrait-safe-fit' : 'pc-landscape-safe-fit';
+        // Reset styles for PC
+        contentWrapper.style.position = 'relative';
+        contentWrapper.style.left = 'auto';
+        contentWrapper.style.top = 'auto';
     }
     
-    // Apply the scale transform with device-specific centering
+    // Apply transform
     contentWrapper.style.transform = `scale(${scale})`;
+    contentWrapper.style.transformOrigin = transformOrigin;
     
-    if (isMobile && isPortrait) {
-        // Mobile portrait: scale from left top to fill width properly
-        contentWrapper.style.transformOrigin = 'left top';
-    } else {
-        // PC and mobile landscape: normal center scaling
-        contentWrapper.style.transformOrigin = 'center center';
+    // Force container styles for mobile portrait
+    const mainContainer = document.querySelector('.main-container');
+    if (mainContainer && isSmallScreen && isPortrait) {
+        mainContainer.style.justifyContent = 'flex-start';
+        mainContainer.style.alignItems = 'flex-start';
+    } else if (mainContainer) {
+        mainContainer.style.justifyContent = 'center';
+        mainContainer.style.alignItems = 'center';
     }
     
-
-    
-
-    
-    console.log(`Applied optimized scaling: ${scale.toFixed(3)} (${strategy})`);
-    console.log(`Device: ${isMobile ? 'Mobile' : 'PC'}, Orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`);
-    console.log(`Screen: ${screenWidth}x${screenHeight}, Design: ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
-    console.log(`Scale ratios - X: ${scaleX.toFixed(3)}, Y: ${scaleY.toFixed(3)}`);
+    console.log(`Applied scaling: ${scale.toFixed(3)} (${strategy})`);
+    console.log(`Device: ${isSmallScreen ? 'Mobile' : 'PC'}, Orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`);
+    console.log(`Screen: ${screenWidth}x${screenHeight}, ScaleX: ${scaleX.toFixed(3)}, ScaleY: ${scaleY.toFixed(3)}`);
 }
 
 
