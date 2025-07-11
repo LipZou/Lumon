@@ -82,10 +82,10 @@ function applyProportionalScaling() {
         contentWrapper.style.transform = `translateY(-50%) scale(${scale})`;
         
     } else if (isSmallScreen && !isPortrait) {
-        // Mobile landscape: use optimal fixed scale, center everything
-        scale = 0.45; // Fixed comfortable scale for mobile landscape
+        // Mobile landscape: fill height, width scales proportionally
+        scale = scaleY; // Fill height, maintain perfect aspect ratio
         transformOrigin = 'center center';
-        strategy = 'mobile-landscape-fixed-optimal';
+        strategy = 'mobile-landscape-height-fill-proportional';
         
         // Reset to centered positioning
         contentWrapper.style.position = 'relative';
