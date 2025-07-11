@@ -466,6 +466,14 @@ function handleResize() {
 
 // Show Lumon letter modal after intro animation
 function showLumonLetter() {
+    console.log('🎬 Showing Lumon letter modal for all devices');
+    
+    // Remove any existing modal first
+    const existingModal = document.getElementById('lumon-letter-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
     const modal = document.createElement('div');
     modal.id = 'lumon-letter-modal';
     modal.style.cssText = `
@@ -590,6 +598,8 @@ function showLumonLetter() {
 
 // Show birthday animation (same as intro but different text)
 function showBirthdayAnimation() {
+    console.log('🎂 Starting birthday animation');
+    
     const birthdayIntro = document.createElement('div');
     birthdayIntro.style.cssText = `
         position: fixed;
@@ -611,7 +621,8 @@ function showBirthdayAnimation() {
             <span style="
                 position: absolute;
                 top: 36px;
-                left: 28px;
+                left: 50%;
+                transform: translateX(-50%);
                 font-family: 'Russo One', sans-serif;
                 font-size: 18px;
                 letter-spacing: 6px;
@@ -621,8 +632,6 @@ function showBirthdayAnimation() {
                 animation-delay: 2s;
                 color: #8EE3F1;
                 text-align: center;
-                width: 400px;
-                left: -140px;
                 white-space: nowrap;
             ">HAPPY BIRTHDAY EILEEN Y.</span>
             <span style="
@@ -734,10 +743,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeMouseEvents();
     applyProportionalScaling();
     
-    // Show Lumon letter after intro animation completes
+    // Show Lumon letter after intro animation completes - for ALL devices
     setTimeout(() => {
         showLumonLetter();
-    }, 5000); // 5 seconds to match intro animation duration
+    }, 4500); // 4.5 seconds to match intro animation exactly
 });
 
 // Handle window resize and orientation changes
