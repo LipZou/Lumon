@@ -43,7 +43,7 @@ body {
 }
 
 /* Mobile optimization: allow content to fill width */
-@media (max-width: 900px), (max-height: 900px) {
+@media (max-width: 900px), (max-height: 900px), (pointer: coarse) {
     .main-container {
         justify-content: flex-start;
         align-items: center;
@@ -52,6 +52,20 @@ body {
     .content-wrapper {
         margin: 0;
         transform-origin: left center;
+    }
+}
+
+/* More specific mobile portrait optimization */
+@media (max-width: 900px) and (orientation: portrait) {
+    .main-container {
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 0;
+    }
+    
+    .content-wrapper {
+        margin: 0;
+        transform-origin: left top;
     }
 }
 
