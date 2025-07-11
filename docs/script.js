@@ -464,11 +464,272 @@ function handleResize() {
 
 
 
+// Show Lumon letter modal after intro animation
+function showLumonLetter() {
+    const modal = document.createElement('div');
+    modal.id = 'lumon-letter-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(8, 32, 58, 0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100000;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    `;
+    
+    const letterContent = document.createElement('div');
+    letterContent.style.cssText = `
+        background: #08203A;
+        border: 2px solid #8EE3F1;
+        color: #8EE3F1;
+        padding: 40px;
+        border-radius: 8px;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 14px;
+        line-height: 1.6;
+        box-shadow: 0 0 20px rgba(142, 227, 241, 0.3);
+    `;
+    
+    letterContent.innerHTML = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-family: 'Russo One', sans-serif; font-size: 20px; letter-spacing: 4px; color: #8EE3F1;">LUMON INDUSTRIES</div>
+            <div style="font-size: 12px; margin-top: 5px; opacity: 0.8;">MACRODATA REFINEMENT DEPARTMENT</div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <strong>Dear Eileen Y.,</strong>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            On behalf of Lumon Industries, and specifically the Macrodata Refinement Department, we extend our sincere congratulations on the anniversary of your birth. This occasion marks a full cycle of terrestrial rotation, and we encourage you to reflect on your contributions to the greater whole.
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            The Macrodata Refinement Department has, for the past year, observed your behaviors with precision and discretion. It is with great satisfaction that we note your consistently exceptional performance, both in observable and inferred metrics.
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            In recognition of these qualities, you are hereby invited to join the Lumon collective. Upon acceptance, you may report to the Macrodata Refinement Department to receive a welcome token curated for new employees.
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            We anticipate, with measured enthusiasm, your continued excellence over the next cycle. The work is mysterious. The work is vital. The work is for the good of all.
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+            <div><strong>With all due reverence,</strong></div>
+            <div style="margin-top: 10px; font-style: italic;">Lumon Industries – Macrodata Refinement Department</div>
+        </div>
+        
+        <div style="text-align: center;">
+            <button id="lumon-accept-btn" style="
+                background: rgba(142, 227, 241, 0.2);
+                border: 2px solid #8EE3F1;
+                color: #8EE3F1;
+                padding: 15px 30px;
+                font-family: 'Russo One', sans-serif;
+                font-size: 16px;
+                letter-spacing: 2px;
+                cursor: pointer;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            ">FOR THE GOOD OF ALL</button>
+        </div>
+    `;
+    
+    modal.appendChild(letterContent);
+    document.body.appendChild(modal);
+    
+    // Button click handler
+    document.getElementById('lumon-accept-btn').addEventListener('click', () => {
+        modal.remove();
+        showBirthdayAnimation();
+    });
+    
+    // Add hover effect to button
+    const btn = document.getElementById('lumon-accept-btn');
+    btn.addEventListener('mouseenter', () => {
+        btn.style.background = 'rgba(142, 227, 241, 0.4)';
+        btn.style.boxShadow = '0 0 15px rgba(142, 227, 241, 0.6)';
+    });
+    btn.addEventListener('mouseleave', () => {
+        btn.style.background = 'rgba(142, 227, 241, 0.2)';
+        btn.style.boxShadow = 'none';
+    });
+}
+
+// Show birthday animation (same as intro but different text)
+function showBirthdayAnimation() {
+    const birthdayIntro = document.createElement('div');
+    birthdayIntro.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 100vw;
+        z-index: 99999;
+        background-color: #08203A;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fade-out ease-in 0.3s forwards;
+        animation-delay: 4.5s;
+    `;
+    
+    birthdayIntro.innerHTML = `
+        <div class="logo">
+            <svg class="logo-svg" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="
+                position: absolute;
+                z-index: 999999;
+                height: 21px;
+                top: 42px;
+                right: 43px;
+                opacity: 0;
+                animation: fade-in ease-in 1s forwards;
+                animation-delay: 2s;
+            ">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58172 0 0 3.58172 0 8V40C0 44.4183 3.58172 48 8 48H40C44.4183 48 48 44.4183 48 40V8C48 3.58172 44.4183 0 40 0H8ZM36 28.75C36 24.2402 32.0006 16.6575 24 6C15.9994 16.6575 12 24.2402 12 28.75C12 35.5155 17.3726 41 24 41C30.6274 41 36 35.5155 36 28.75Z" fill="#8EE3F1"/>
+            </svg>
+            <span style="
+                position: absolute;
+                top: 36px;
+                left: 28px;
+                font-family: 'Russo One', sans-serif;
+                font-size: 20px;
+                letter-spacing: 8px;
+                z-index: 99999;
+                opacity: 0;
+                animation: fade-in ease-in 1s forwards;
+                animation-delay: 2s;
+                color: #8EE3F1;
+                text-align: center;
+                width: 300px;
+                left: -90px;
+            ">HAPPY BIRTHDAY<br/><span style="font-size: 24px; letter-spacing: 12px;">EILEEN Y.</span></span>
+            <span style="
+                position: absolute;
+                width: 0;
+                top: 33px;
+                left: 20px;
+                height: 40px;
+                background-color: #08203A;
+                z-index: 9999;
+                animation: grow linear 0.6s forwards;
+                animation-delay: 1.5s;
+            "></span>
+            <span style="
+                display: block;
+                width: 200px;
+                height: 100px;
+                border: 2px solid #8EE3F1;
+                border-radius: 100%;
+                position: relative;
+            ">
+                <span style="
+                    content: '';
+                    width: 0;
+                    height: 100%;
+                    position: absolute;
+                    top: -2px;
+                    left: 50%;
+                    border: 2px solid #8EE3F1;
+                    border-radius: 100%;
+                    animation: scale72 linear 1s forwards;
+                    animation-delay: 1s;
+                    opacity: 0;
+                    display: block;
+                "></span>
+                <span style="
+                    content: '';
+                    width: 0;
+                    height: 100%;
+                    position: absolute;
+                    top: -2px;
+                    left: 50%;
+                    border: 2px solid #8EE3F1;
+                    border-radius: 100%;
+                    animation: scale33 linear 1s forwards;
+                    animation-delay: 1.8s;
+                    opacity: 0;
+                    display: block;
+                "></span>
+            </span>
+        </div>
+    `;
+    
+    // Add borders animation
+    const logo = birthdayIntro.querySelector('.logo');
+    logo.style.cssText = `
+        position: relative;
+        opacity: 1;
+        animation: fade-out ease-in 1s forwards;
+        animation-delay: 3.3s;
+    `;
+    
+    // Add top border
+    const topBorder = document.createElement('span');
+    topBorder.style.cssText = `
+        content: '';
+        position: absolute;
+        left: 21px;
+        top: 21px;
+        width: 0;
+        margin-left: 80%;
+        height: 2px;
+        background-color: #8EE3F1;
+        animation: grow ease-in 0.8s forwards;
+        animation-delay: 1.5s;
+        display: block;
+    `;
+    logo.appendChild(topBorder);
+    
+    // Add bottom border
+    const bottomBorder = document.createElement('span');
+    bottomBorder.style.cssText = `
+        content: '';
+        position: absolute;
+        left: 21px;
+        bottom: 21px;
+        width: 0;
+        height: 2px;
+        background-color: #8EE3F1;
+        animation: grow ease-in 0.8s forwards;
+        animation-delay: 2s;
+        display: block;
+    `;
+    logo.appendChild(bottomBorder);
+    
+    document.body.appendChild(birthdayIntro);
+    
+    // Remove after animation completes
+    setTimeout(() => {
+        if (birthdayIntro.parentNode) {
+            birthdayIntro.parentNode.removeChild(birthdayIntro);
+        }
+    }, 5000);
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     initializeGrid();
     initializeMouseEvents();
     applyProportionalScaling();
+    
+    // Show Lumon letter after intro animation completes
+    setTimeout(() => {
+        showLumonLetter();
+    }, 5000); // 5 seconds to match intro animation duration
 });
 
 // Handle window resize and orientation changes
