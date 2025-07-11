@@ -1,39 +1,36 @@
-// Dynamic grid constants - will be read from CSS variables
-let GRID_WIDTH = 30;
-let GRID_HEIGHT = 13;
+// Fixed grid constants for PC layout
+const GRID_WIDTH = 30;
+const GRID_HEIGHT = 13;
 
 // Mouse scaling configuration
 const MOUSE_EFFECT_RADIUS = 150; // pixels
 const MAX_SCALE_MULTIPLIER = 2.5;
 const MIN_SCALE_MULTIPLIER = 1.0;
 
-// Safari mobile viewport fix
-function setSafariViewportHeight() {
-    // Calculate the actual viewport height for Safari mobile
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-    
-    // Force height recalculation on Safari
-    if (/Safari/.test(navigator.userAgent) && /Mobile/.test(navigator.userAgent)) {
-        document.body.style.height = `${window.innerHeight}px`;
-        
-        // Update section height for landscape mode
-        const section = document.querySelector('section');
-        if (section && window.innerWidth > window.innerHeight) {
-            const header = document.querySelector('header');
-            const headerHeight = header ? header.offsetHeight : 35;
-            section.style.height = `${window.innerHeight - headerHeight}px`;
-        }
-    }
-}
+// Design dimensions (PC layout)
+const DESIGN_WIDTH = 1920;
+const DESIGN_HEIGHT = 1080;
 
-// Get current grid size from CSS variables
-function getGridSize() {
-    const section = document.querySelector('section');
-    const styles = getComputedStyle(section);
-    const cols = parseInt(styles.getPropertyValue('--grid-cols')) || 30;
-    const rows = parseInt(styles.getPropertyValue('--grid-rows')) || 13;
-    return { cols, rows };
+// Calculate and apply proportional scaling
+function applyProportionalScaling() {
+    const contentWrapper = document.querySelector('.content-wrapper');
+    if (!contentWrapper) return;
+    
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    // Calculate scale ratios
+    const scaleX = screenWidth / DESIGN_WIDTH;
+    const scaleY = screenHeight / DESIGN_HEIGHT;
+    
+    // Use the smaller scale to ensure content fits completely
+    const scale = Math.min(scaleX, scaleY);
+    
+    // Apply the scale transform
+    contentWrapper.style.transform = `scale(${scale})`;
+    
+    console.log(`Applied proportional scaling: ${scale.toFixed(3)}`);
+    console.log(`Screen: ${screenWidth}x${screenHeight}, Design: ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
 }
 
 // Generate random number between 2-9
@@ -48,30 +45,19 @@ function charToBinary(char) {
     return binary.split('').map(bit => parseInt(bit));
 }
 
-// Convert text to binary matrix with word spacing
-function textToBinaryMatrix(text, maxWidth = null) {
+// Convert text to binary matrix with word spacing (simplified - no responsive logic)
+function textToBinaryMatrix(text) {
     const words = text.split(' ');
     const matrix = [];
     const wordLengths = [];
-    
-    // If maxWidth is specified, try to fit text within it
-    let processedWords = words;
-    if (maxWidth && text.length > maxWidth) {
-        // For small screens, use abbreviated text
-        if (maxWidth < 15) {
-            processedWords = ['YOU', 'DESERVE'];
-        } else if (maxWidth < 20) {
-            processedWords = ['YOU', 'DESERVE', 'ALL'];
-        }
-    }
     
     // Create 8 rows (for 8 bits)
     for (let row = 0; row < 8; row++) {
         matrix[row] = [];
         
         // For each word
-        for (let wordIndex = 0; wordIndex < processedWords.length; wordIndex++) {
-            const word = processedWords[wordIndex];
+        for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
+            const word = words[wordIndex];
             
             if (row === 0) {
                 wordLengths.push(word.length);
@@ -85,13 +71,13 @@ function textToBinaryMatrix(text, maxWidth = null) {
             }
             
             // Add spacing between words (except after the last word)
-            if (wordIndex < processedWords.length - 1) {
+            if (wordIndex < words.length - 1) {
                 matrix[row].push(-1); // Use -1 to represent spacing
             }
         }
     }
     
-    return { matrix, wordLengths, processedWords };
+    return { matrix, wordLengths, processedWords: words };
 }
 
 // Get element center position in viewport
@@ -220,24 +206,18 @@ function resetScaling() {
     });
 }
 
-// Initialize the grid with responsive sizing
+// Initialize the grid with fixed PC layout
 function initializeGrid() {
     const section = document.querySelector('section');
     
     // Clear existing content
     section.innerHTML = '';
     
-    // Get current grid size from CSS
-    const { cols, rows } = getGridSize();
-    GRID_WIDTH = cols;
-    GRID_HEIGHT = rows;
-    
     console.log(`Initializing ${GRID_WIDTH}×${GRID_HEIGHT} grid`);
     
-    // Create the text matrix with responsive text fitting
+    // Create the text matrix (always full text)
     const text = "YOU DESERVE EVERYTHING";
-    const maxTextWidth = Math.floor(GRID_WIDTH * 0.8); // Use 80% of grid width
-    const { matrix: binaryMatrix, wordLengths, processedWords } = textToBinaryMatrix(text, maxTextWidth);
+    const { matrix: binaryMatrix, wordLengths, processedWords } = textToBinaryMatrix(text);
     
     // Calculate starting position to center the text
     const textWidth = binaryMatrix[0].length;
@@ -357,46 +337,36 @@ function initializeMouseEvents() {
 
 
 
-// Reinitialize on window resize to handle orientation changes
+// Handle window resize with proportional scaling
 function handleResize() {
-    // Fix Safari viewport issues first
-    setSafariViewportHeight();
-    
     // Debounce resize events
     clearTimeout(window.resizeTimeout);
     window.resizeTimeout = setTimeout(() => {
-        const { cols, rows } = getGridSize();
-        if (cols !== GRID_WIDTH || rows !== GRID_HEIGHT) {
-            console.log(`Grid size changed from ${GRID_WIDTH}×${GRID_HEIGHT} to ${cols}×${rows}`);
-            initializeGrid();
-            initializeMouseEvents(); // Reinitialize mouse events after grid recreation
-        }
-    }, 250);
+        applyProportionalScaling();
+        console.log('Applied proportional scaling on resize');
+    }, 100);
 }
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    setSafariViewportHeight();
     initializeGrid();
     initializeMouseEvents();
+    applyProportionalScaling();
 });
 
-// Reinitialize on window resize (for orientation changes, etc.)
+// Handle window resize and orientation changes
 window.addEventListener('resize', handleResize);
 
 // Force update after CSS loads
 window.addEventListener('load', () => {
     setTimeout(() => {
-        setSafariViewportHeight();
-        initializeGrid();
-        initializeMouseEvents();
+        applyProportionalScaling();
     }, 100);
 });
 
-// Handle orientation changes specifically for mobile Safari
+// Handle orientation changes
 window.addEventListener('orientationchange', () => {
     setTimeout(() => {
-        setSafariViewportHeight();
-        handleResize();
+        applyProportionalScaling();
     }, 100);
 });
