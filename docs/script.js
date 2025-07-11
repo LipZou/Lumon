@@ -490,14 +490,33 @@ function showLumonLetter() {
         color: #8EE3F1;
         padding: 40px;
         border-radius: 8px;
-        max-width: 600px;
+        max-width: 90vw;
+        width: 600px;
         max-height: 80vh;
         overflow-y: auto;
         font-family: 'Share Tech Mono', monospace;
         font-size: 14px;
         line-height: 1.6;
         box-shadow: 0 0 20px rgba(142, 227, 241, 0.3);
+        margin: 20px;
     `;
+    
+    // Add media query styles for better mobile experience
+    const mediaStyle = document.createElement('style');
+    mediaStyle.textContent = `
+        @media (max-width: 768px) {
+            #lumon-letter-modal .letter-content {
+                padding: 20px !important;
+                font-size: 12px !important;
+                margin: 10px !important;
+                width: calc(100vw - 40px) !important;
+                max-width: none !important;
+            }
+        }
+    `;
+    document.head.appendChild(mediaStyle);
+    
+    letterContent.classList.add('letter-content');
     
     letterContent.innerHTML = `
         <div style="text-align: center; margin-bottom: 30px;">
@@ -589,34 +608,23 @@ function showBirthdayAnimation() {
     
     birthdayIntro.innerHTML = `
         <div class="logo">
-            <svg class="logo-svg" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="
-                position: absolute;
-                z-index: 999999;
-                height: 21px;
-                top: 42px;
-                right: 43px;
-                opacity: 0;
-                animation: fade-in ease-in 1s forwards;
-                animation-delay: 2s;
-            ">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58172 0 0 3.58172 0 8V40C0 44.4183 3.58172 48 8 48H40C44.4183 48 48 44.4183 48 40V8C48 3.58172 44.4183 0 40 0H8ZM36 28.75C36 24.2402 32.0006 16.6575 24 6C15.9994 16.6575 12 24.2402 12 28.75C12 35.5155 17.3726 41 24 41C30.6274 41 36 35.5155 36 28.75Z" fill="#8EE3F1"/>
-            </svg>
             <span style="
                 position: absolute;
                 top: 36px;
                 left: 28px;
                 font-family: 'Russo One', sans-serif;
-                font-size: 20px;
-                letter-spacing: 8px;
+                font-size: 18px;
+                letter-spacing: 6px;
                 z-index: 99999;
                 opacity: 0;
                 animation: fade-in ease-in 1s forwards;
                 animation-delay: 2s;
                 color: #8EE3F1;
                 text-align: center;
-                width: 300px;
-                left: -90px;
-            ">HAPPY BIRTHDAY<br/><span style="font-size: 24px; letter-spacing: 12px;">EILEEN Y.</span></span>
+                width: 400px;
+                left: -140px;
+                white-space: nowrap;
+            ">HAPPY BIRTHDAY EILEEN Y.</span>
             <span style="
                 position: absolute;
                 width: 0;
