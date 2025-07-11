@@ -13,23 +13,23 @@ const DESIGN_HEIGHT = 1080;
 
 
 
-// More accurate mobile detection
+// Simplified and more reliable mobile detection
 function isMobileDevice() {
     // Primary detection: User Agent
     const userAgent = navigator.userAgent.toLowerCase();
     const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|phone|tablet/i.test(userAgent);
     
-    // Secondary detection: Touch capability (but exclude laptop touchscreens)
-    const hasTouchPoints = navigator.maxTouchPoints && navigator.maxTouchPoints > 1;
+    // Secondary detection: Touch capability 
+    const hasTouchPoints = navigator.maxTouchPoints && navigator.maxTouchPoints > 0;
     
-    // Only use screen size as fallback for genuine mobile devices
-    // Don't use screen size alone to avoid misclassifying resized desktop browsers
-    const isMobileSize = window.innerWidth <= 768 && window.innerHeight <= 1024;
+    // Screen size detection - be more aggressive for mobile
+    const isMobileSize = window.innerWidth <= 900 || window.innerHeight <= 900;
     
-    // More conservative detection: prioritize UA and touch, only use size as confirmation
-    const result = isMobileUA || (hasTouchPoints && isMobileSize);
+    // More liberal detection: if ANY indicator suggests mobile, treat as mobile
+    const result = isMobileUA || hasTouchPoints || isMobileSize;
     
-    console.log('Mobile detection:', {
+    // Force debug output to console
+    console.warn('🔍 MOBILE DETECTION DEBUG:', {
         userAgent: userAgent,
         isMobileUA: isMobileUA,
         hasTouchPoints: hasTouchPoints,
@@ -37,7 +37,7 @@ function isMobileDevice() {
         screenWidth: window.innerWidth,
         screenHeight: window.innerHeight,
         isMobileSize: isMobileSize,
-        result: result
+        FINAL_RESULT: result
     });
     
     return result;
@@ -68,20 +68,32 @@ function applyProportionalScaling() {
     let scale;
     let strategy = '';
     
+    // Force debug output
+    console.warn('📐 SCALING DEBUG START:', {
+        screenWidth, screenHeight, isPortrait, isMobile,
+        scaleX: scaleX.toFixed(3), 
+        scaleY: scaleY.toFixed(3)
+    });
+    
     if (isMobile) {
         // Mobile优化策略：最大化利用屏幕空间
         if (isPortrait) {
-            // 手机竖屏：强制填满宽度，更激进的策略
-            // 允许更多的高度溢出，只要不超过20%就接受
+            // 手机竖屏：更激进的宽度填充策略
             const heightAfterWidthScale = DESIGN_HEIGHT * scaleX;
             const heightOverflow = heightAfterWidthScale / screenHeight;
             
-            if (heightOverflow <= 1.20) {
-                // 优先使用宽度填满策略，允许20%的高度溢出
+            console.warn('📱 MOBILE PORTRAIT CALCULATION:', {
+                heightAfterWidthScale: heightAfterWidthScale.toFixed(1),
+                heightOverflow: heightOverflow.toFixed(3),
+                willUseWidthScale: heightOverflow <= 1.30
+            });
+            
+            if (heightOverflow <= 1.30) {
+                // 进一步放宽限制：允许30%的高度溢出
                 scale = scaleX;
-                strategy = 'mobile-portrait-fill-width-aggressive';
+                strategy = 'mobile-portrait-fill-width-super-aggressive';
             } else {
-                // 只有在严重溢出时才完全适配
+                // 只有在极端溢出时才完全适配
                 scale = Math.min(scaleX, scaleY);
                 strategy = 'mobile-portrait-fit-complete';
             }
@@ -100,7 +112,6 @@ function applyProportionalScaling() {
         }
     } else {
         // PC端：绝对保证完整显示，零溢出政策
-        // 无论全屏还是窗口模式，都要确保内容完整可见
         scale = Math.min(scaleX, scaleY);
         
         // 为PC端添加额外的安全边距，确保header完全可见
@@ -114,11 +125,68 @@ function applyProportionalScaling() {
     contentWrapper.style.transform = `scale(${scale})`;
     contentWrapper.style.transformOrigin = 'center center';
     
+    // Enhanced debug output
+    console.warn('🎯 SCALING APPLIED:', {
+        finalScale: scale.toFixed(3),
+        strategy: strategy,
+        device: isMobile ? 'MOBILE' : 'PC',
+        orientation: isPortrait ? 'PORTRAIT' : 'LANDSCAPE',
+        transform: `scale(${scale.toFixed(3)})`
+    });
+    
+    // Show debug info on page (temporary)
+    showDebugInfo(scale, strategy, isMobile, isPortrait, screenWidth, screenHeight);
+    
     console.log(`Applied optimized scaling: ${scale.toFixed(3)} (${strategy})`);
     console.log(`Device: ${isMobile ? 'Mobile' : 'PC'}, Orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`);
     console.log(`Screen: ${screenWidth}x${screenHeight}, Design: ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
     console.log(`Scale ratios - X: ${scaleX.toFixed(3)}, Y: ${scaleY.toFixed(3)}`);
-    console.log(`Height overflow (mobile portrait): ${isMobile && isPortrait ? (DESIGN_HEIGHT * scaleX / screenHeight * 100).toFixed(1) + '%' : 'N/A'}`);
+}
+
+// Show debug information on the page
+function showDebugInfo(scale, strategy, isMobile, isPortrait, screenWidth, screenHeight) {
+    // Remove existing debug info
+    const existingDebug = document.getElementById('debug-info');
+    if (existingDebug) {
+        existingDebug.remove();
+    }
+    
+    const debugDiv = document.createElement('div');
+    debugDiv.id = 'debug-info';
+    debugDiv.style.cssText = `
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background: rgba(255, 0, 0, 0.9);
+        color: white;
+        padding: 10px;
+        font-size: 12px;
+        z-index: 999999;
+        border-radius: 5px;
+        font-family: monospace;
+        line-height: 1.3;
+        max-width: 300px;
+    `;
+    
+    debugDiv.innerHTML = `
+        <div><strong>🔍 DEBUG INFO</strong></div>
+        <div>Device: ${isMobile ? 'MOBILE' : 'PC'}</div>
+        <div>Orientation: ${isPortrait ? 'Portrait' : 'Landscape'}</div>
+        <div>Screen: ${screenWidth}×${screenHeight}</div>
+        <div>Scale: ${scale.toFixed(3)}</div>
+        <div>Strategy: ${strategy}</div>
+        <div>ScaleX: ${(screenWidth / DESIGN_WIDTH).toFixed(3)}</div>
+        <div>ScaleY: ${(screenHeight / DESIGN_HEIGHT).toFixed(3)}</div>
+    `;
+    
+    document.body.appendChild(debugDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (debugDiv.parentNode) {
+            debugDiv.parentNode.removeChild(debugDiv);
+        }
+    }, 5000);
 }
 
 // Generate random number between 2-9
