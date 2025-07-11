@@ -11,187 +11,7 @@ const MIN_SCALE_MULTIPLIER = 1.0;
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
 
-// Fullscreen functionality with iOS Safari support
-const fullscreenUtils = {
-    // Check if fullscreen is supported
-    isSupported() {
-        // Check for standard Fullscreen API
-        const standardSupport = !!(document.documentElement.requestFullscreen ||
-                 document.documentElement.webkitRequestFullscreen ||
-                 document.documentElement.mozRequestFullScreen ||
-                 document.documentElement.msRequestFullscreen);
-        
-        // For iOS Safari, we always return true but will show manual instructions if needed
-        const isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        
-        console.log('Fullscreen support check:', {
-            standardSupport: standardSupport,
-            isSafariIOS: isSafariIOS,
-            userAgent: navigator.userAgent
-        });
-        
-        // Always allow fullscreen attempt on mobile devices
-        return standardSupport || isSafariIOS;
-    },
-    
-    // iOS Safari specific fullscreen method
-    async enterIOS() {
-        try {
-            const element = document.documentElement;
-            if (element.webkitRequestFullscreen) {
-                await element.webkitRequestFullscreen();
-                return true;
-            } else if (element.webkitEnterFullscreen) {
-                await element.webkitEnterFullscreen();
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.log('iOS fullscreen failed:', error);
-            return false;
-        }
-    },
-    
-    // Enter fullscreen with iOS support
-    async enter() {
-        const element = document.documentElement;
-        
-        // Detect iOS Safari
-        const isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        
-        try {
-            if (isSafariIOS) {
-                // Try iOS specific methods first
-                if (element.webkitRequestFullscreen) {
-                    await element.webkitRequestFullscreen();
-                    console.log('Entered fullscreen using webkit (iOS)');
-                    return true;
-                }
-            }
-            
-            // Standard methods
-            if (element.requestFullscreen) {
-                await element.requestFullscreen();
-            } else if (element.webkitRequestFullscreen) {
-                await element.webkitRequestFullscreen();
-            } else if (element.mozRequestFullScreen) {
-                await element.mozRequestFullScreen();
-            } else if (element.msRequestFullscreen) {
-                await element.msRequestFullscreen();
-            } else {
-                throw new Error('No fullscreen method available');
-            }
-            
-            console.log('Entered fullscreen mode');
-            return true;
-        } catch (error) {
-            console.log('Failed to enter fullscreen:', error);
-            
-            // Fallback: Show manual instructions for iOS
-            if (isSafariIOS) {
-                this.showManualFullscreenInstructions();
-                return false;
-            }
-            
-            return false;
-        }
-    },
-    
-    // Exit fullscreen
-    async exit() {
-        try {
-            if (document.exitFullscreen) {
-                await document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                await document.webkitExitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                await document.mozCancelFullScreen();
-            } else if (document.msExitFullscreen) {
-                await document.msExitFullscreen();
-            }
-            console.log('Exited fullscreen mode');
-            return true;
-        } catch (error) {
-            console.log('Failed to exit fullscreen:', error);
-            return false;
-        }
-    },
-    
-    // Check if currently in fullscreen
-    isActive() {
-        return !!(document.fullscreenElement ||
-                 document.webkitFullscreenElement ||
-                 document.mozFullScreenElement ||
-                 document.msFullscreenElement);
-    },
-    
-    // Show manual fullscreen instructions for iOS
-    showManualFullscreenInstructions() {
-        const instructions = document.createElement('div');
-        instructions.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(8, 32, 58, 0.95);
-            color: #8EE3F1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 999999;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-            font-size: 18px;
-            line-height: 1.6;
-        `;
-        
-        instructions.innerHTML = `
-            <div style="max-width: 400px;">
-                <div style="font-size: 48px; margin-bottom: 20px;">📱</div>
-                <div style="font-size: 24px; margin-bottom: 20px; color: #ffffff;">手动进入全屏模式</div>
-                <div style="margin-bottom: 30px;">
-                    在Safari中，点击地址栏右侧的<br/>
-                    <strong style="color: #8EE3F1;">分享按钮 📤</strong><br/>
-                    然后选择<br/>
-                    <strong style="color: #8EE3F1;">"添加到主屏幕"</strong>
-                </div>
-                <div style="margin-bottom: 30px; font-size: 16px; opacity: 0.8;">
-                    或者将手机横屏并隐藏地址栏<br/>
-                    获得更好的全屏体验
-                </div>
-                <button id="close-instructions" style="
-                    background: rgba(142, 227, 241, 0.3);
-                    border: 2px solid #8EE3F1;
-                    color: #8EE3F1;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    cursor: pointer;
-                    touch-action: manipulation;
-                ">我知道了</button>
-            </div>
-        `;
-        
-        const closeButton = instructions.querySelector('#close-instructions');
-        closeButton.addEventListener('click', () => {
-            document.body.removeChild(instructions);
-        });
-        
-        document.body.appendChild(instructions);
-    },
-    
-    // Toggle fullscreen
-    async toggle() {
-        if (this.isActive()) {
-            return await this.exit();
-        } else {
-            return await this.enter();
-        }
-    }
-};
+
 
 // Mobile detection (improved)
 function isMobileDevice() {
@@ -215,170 +35,15 @@ function isMobileDevice() {
     return result;
 }
 
-// Check if device is in landscape mode
-function isLandscape() {
-    return window.innerWidth > window.innerHeight;
-}
-
-// Create fullscreen button for mobile
-function createFullscreenButton() {
-    console.log('Attempting to create fullscreen button...');
-    console.log('isMobileDevice():', isMobileDevice());
-    
-    // Create button on mobile devices
-    if (!isMobileDevice()) {
-        console.log('Not creating button: not a mobile device');
-        return;
-    }
-    
-    // Remove existing button if any
-    const existingButton = document.getElementById('fullscreen-btn');
-    if (existingButton) {
-        existingButton.remove();
-    }
-    
-    const button = document.createElement('button');
-    button.id = 'fullscreen-btn';
-    button.innerHTML = '⛶';
-    button.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 999999;
-        background: rgba(142, 227, 241, 0.3);
-        border: 2px solid #8EE3F1;
-        color: #8EE3F1;
-        width: 50px;
-        height: 50px;
-        border-radius: 8px;
-        font-size: 20px;
-        cursor: pointer;
-        backdrop-filter: blur(10px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 0 10px rgba(142, 227, 241, 0.5);
-        -webkit-backdrop-filter: blur(10px);
-        touch-action: manipulation;
-    `;
-    
-    // Update button appearance based on fullscreen state
-    function updateButton() {
-        if (fullscreenUtils.isActive()) {
-            button.innerHTML = '⛷';
-            button.title = 'Exit Fullscreen | 退出全屏';
-            button.style.background = 'rgba(255, 100, 100, 0.3)';
-            button.style.borderColor = '#ff6464';
-            button.style.color = '#ff6464';
-        } else {
-            button.innerHTML = '⛶';
-            button.title = 'Enter Fullscreen | 进入全屏';
-            button.style.background = 'rgba(142, 227, 241, 0.3)';
-            button.style.borderColor = '#8EE3F1';
-            button.style.color = '#8EE3F1';
-        }
-    }
-    
-    button.addEventListener('click', async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('Fullscreen button clicked');
-        
-        const success = await fullscreenUtils.toggle();
-        console.log('Fullscreen toggle result:', success);
-        
-        if (success) {
-            updateButton();
-            setTimeout(applyProportionalScaling, 100);
-        }
-        // Note: If fullscreen fails, fullscreenUtils.enter() will automatically show manual instructions for iOS
-    });
-    
-    // Listen for fullscreen changes
-    document.addEventListener('fullscreenchange', updateButton);
-    document.addEventListener('webkitfullscreenchange', updateButton);
-    document.addEventListener('mozfullscreenchange', updateButton);
-    document.addEventListener('MSFullscreenChange', updateButton);
-    
-    // Ensure button is added to body and visible
-    document.body.appendChild(button);
-    updateButton();
-    
-    // Force show button after intro animation
-    setTimeout(() => {
-        button.style.display = 'flex';
-        button.style.opacity = '1';
-    }, 5000); // After intro animation completes
-    
-    console.log('Fullscreen button created and added to DOM');
-    console.log('Button element:', button);
-    
-    return button;
-}
 
 
 
-// Auto-enter fullscreen on landscape for mobile
-async function handleOrientationForFullscreen() {
-    if (!isMobileDevice() || !fullscreenUtils.isSupported()) return;
-    
-    // Only auto-enter fullscreen, don't auto-exit to avoid annoyance
-    if (isLandscape() && !fullscreenUtils.isActive()) {
-        // Show a brief notification before entering fullscreen
-        showFullscreenTip();
-        
-        // Delay to let user read the tip
-        setTimeout(async () => {
-            const success = await fullscreenUtils.enter();
-            if (success) {
-                setTimeout(applyProportionalScaling, 100);
-            }
-        }, 1500);
-    }
-}
 
-// Show fullscreen tip
-function showFullscreenTip(customMessage = null) {
-    const tip = document.createElement('div');
-    tip.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(8, 32, 58, 0.95);
-        border: 2px solid #8EE3F1;
-        color: #8EE3F1;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        z-index: 999999;
-        font-size: 16px;
-        max-width: 300px;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    `;
-    
-    if (customMessage) {
-        tip.innerHTML = `<div>🌐 ${customMessage}</div>`;
-    } else {
-        tip.innerHTML = `
-            <div>🌐 Entering fullscreen for better experience</div>
-            <div style="font-size: 14px; margin-top: 8px; opacity: 0.8;">正在进入全屏以获得更好体验</div>
-        `;
-    }
-    
-    document.body.appendChild(tip);
-    
-    // Remove tip after 3 seconds
-    setTimeout(() => {
-        if (tip.parentNode) {
-            tip.parentNode.removeChild(tip);
-        }
-    }, 3000);
-}
 
-// Calculate and apply proportional scaling
+
+
+
+// Calculate and apply intelligent scaling with perfect centering
 function applyProportionalScaling() {
     const contentWrapper = document.querySelector('.content-wrapper');
     if (!contentWrapper) return;
@@ -390,14 +55,51 @@ function applyProportionalScaling() {
     const scaleX = screenWidth / DESIGN_WIDTH;
     const scaleY = screenHeight / DESIGN_HEIGHT;
     
-    // Use the smaller scale to ensure content fits completely
-    const scale = Math.min(scaleX, scaleY);
+    // Smart scaling strategy:
+    // - Landscape: prioritize filling width (if reasonable)
+    // - Portrait: prioritize filling height (if reasonable)
+    // - Always maintain aspect ratio
     
-    // Apply the scale transform
+    let scale;
+    let strategy = '';
+    
+    if (screenWidth >= screenHeight) {
+        // Landscape mode: try to fill width first, but don't exceed reasonable bounds
+        const maxScaleForHeight = screenHeight / DESIGN_HEIGHT;
+        const scaleForWidth = scaleX;
+        
+        if (scaleForWidth <= maxScaleForHeight * 1.1) {
+            // If filling width doesn't cause too much height overflow, use it
+            scale = scaleForWidth;
+            strategy = 'landscape-fill-width';
+        } else {
+            // Otherwise, fit completely
+            scale = Math.min(scaleX, scaleY);
+            strategy = 'landscape-fit-complete';
+        }
+    } else {
+        // Portrait mode: try to fill height first
+        const maxScaleForWidth = screenWidth / DESIGN_WIDTH;
+        const scaleForHeight = scaleY;
+        
+        if (scaleForHeight <= maxScaleForWidth * 1.1) {
+            // If filling height doesn't cause too much width overflow, use it
+            scale = scaleForHeight;
+            strategy = 'portrait-fill-height';
+        } else {
+            // Otherwise, fit completely
+            scale = Math.min(scaleX, scaleY);
+            strategy = 'portrait-fit-complete';
+        }
+    }
+    
+    // Apply the scale transform with perfect centering
     contentWrapper.style.transform = `scale(${scale})`;
+    contentWrapper.style.transformOrigin = 'center center';
     
-    console.log(`Applied proportional scaling: ${scale.toFixed(3)}`);
+    console.log(`Applied intelligent scaling: ${scale.toFixed(3)} (${strategy})`);
     console.log(`Screen: ${screenWidth}x${screenHeight}, Design: ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
+    console.log(`Scale ratios - X: ${scaleX.toFixed(3)}, Y: ${scaleY.toFixed(3)}`);
 }
 
 // Generate random number between 2-9
@@ -714,37 +416,13 @@ function handleResize() {
     }, 100);
 }
 
-// Handle fullscreen state changes
-function handleFullscreenChange() {
-    console.log('Fullscreen state changed:', fullscreenUtils.isActive());
-    // Recalculate scaling when entering/exiting fullscreen
-    setTimeout(() => {
-        applyProportionalScaling();
-    }, 100);
-}
+
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     initializeGrid();
     initializeMouseEvents();
     applyProportionalScaling();
-    
-    // Create fullscreen button immediately
-    console.log('Creating fullscreen button on DOMContentLoaded...');
-    createFullscreenButton();
-    
-    // Create button again after intro animation to ensure visibility
-    setTimeout(() => {
-        console.log('Creating fullscreen button after intro delay...');
-        createFullscreenButton();
-        handleOrientationForFullscreen();
-    }, 5000);
-    
-    // Listen for fullscreen changes globally
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 });
 
 // Handle window resize and orientation changes
@@ -761,6 +439,5 @@ window.addEventListener('load', () => {
 window.addEventListener('orientationchange', () => {
     setTimeout(() => {
         applyProportionalScaling();
-        handleOrientationForFullscreen(); // Check if should enter fullscreen
     }, 100);
 });
