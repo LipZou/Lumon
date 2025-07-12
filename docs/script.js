@@ -28,16 +28,7 @@ function isMobileDevice() {
     // More liberal detection: if ANY indicator suggests mobile, treat as mobile
     const result = isMobileUA || hasTouchPoints || isMobileSize;
     
-    console.log('Mobile detection:', {
-        userAgent: userAgent,
-        isMobileUA: isMobileUA,
-        hasTouchPoints: hasTouchPoints,
-        touchPoints: navigator.maxTouchPoints,
-        screenWidth: window.innerWidth,
-        screenHeight: window.innerHeight,
-        isMobileSize: isMobileSize,
-        result: result
-    });
+    // Mobile detection completed
     
     return result;
 }
@@ -141,9 +132,7 @@ function applyProportionalScaling() {
         mainContainer.style.alignItems = 'center';
     }
     
-    console.log(`Applied scaling: ${scale.toFixed(3)} (${strategy})`);
-    console.log(`Device: ${isSmallScreen ? 'Mobile' : 'PC'}, Orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`);
-    console.log(`Screen: ${screenWidth}x${screenHeight}, ScaleX: ${scaleX.toFixed(3)}, ScaleY: ${scaleY.toFixed(3)}`);
+    // Scaling applied successfully
 }
 
 
@@ -328,7 +317,7 @@ function initializeGrid() {
     // Clear existing content
     section.innerHTML = '';
     
-    console.log(`Initializing ${GRID_WIDTH}×${GRID_HEIGHT} grid`);
+    // Initializing grid
     
     // Create the text matrix (always full text)
     const text = "YOU DESERVE EVERYTHING";
@@ -426,9 +415,7 @@ function initializeGrid() {
     // Set initial scaling for all elements
     resetScaling();
     
-    console.log(`Created ${GRID_WIDTH}×${GRID_HEIGHT} grid with binary matrix for: "${processedWords.join(' ')}"`);
-    console.log('Matrix size:', textWidth, 'x', textHeight);
-    console.log('Matrix starts at:', { startRow: effectiveStartRow, startCol: effectiveStartCol });
+    // Grid creation completed
 }
 
 // Initialize mouse and touch event listeners
@@ -447,7 +434,7 @@ function initializeMouseEvents() {
     // Reset scaling when mouse leaves the section (desktop only)
     section.addEventListener('mouseleave', resetScaling);
     
-    console.log('Mouse and touch scaling events initialized');
+    // Mouse and touch events initialized
 }
 
 
@@ -458,7 +445,7 @@ function handleResize() {
     clearTimeout(window.resizeTimeout);
     window.resizeTimeout = setTimeout(() => {
         applyProportionalScaling();
-        console.log('Applied proportional scaling on resize');
+        // Applied proportional scaling on resize
     }, 100);
 }
 
@@ -466,7 +453,7 @@ function handleResize() {
 
 // Show Lumon letter modal after intro animation
 function showLumonLetter() {
-    console.log('🎬 Showing Lumon letter modal for all devices');
+    // Showing Lumon letter modal for all devices
     
     // Remove any existing modal first
     const existingModal = document.getElementById('lumon-letter-modal');
@@ -598,7 +585,7 @@ function showLumonLetter() {
 
 // Show birthday animation (same as intro but different text)
 function showBirthdayAnimation() {
-    console.log('🎂 Starting birthday animation');
+    // Starting birthday animation
     
     const birthdayIntro = document.createElement('div');
     birthdayIntro.style.cssText = `

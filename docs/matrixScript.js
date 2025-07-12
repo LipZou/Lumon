@@ -94,8 +94,6 @@ function initializeGrid() {
     const totalDivs = divs.length;
     const gridLayout = calculateGridLayout(totalDivs);
     
-    console.log(`网格布局: ${gridLayout.rows}行 × ${gridLayout.cols}列`);
-    
     // 定义矩阵配置
     const matrixConfigs = [
         // 第一行：HAPPY (从第2行开始，留出顶部空间)

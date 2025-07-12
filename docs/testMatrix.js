@@ -1,15 +1,12 @@
 // 简化版二进制矩阵测试
-console.log('Matrix script loaded');
 
 // 等待DOM加载完成
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded');
     
     const divs = document.querySelectorAll('section div');
-    console.log('Found divs:', divs.length);
     
     if(divs.length === 0) {
-        console.error('No divs found in section!');
+        // No divs found in section
         return;
     }
     
@@ -25,7 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 计算网格尺寸
     const totalDivs = divs.length;
     const cols = Math.ceil(Math.sqrt(totalDivs)); // 估算列数
-    console.log(`Total divs: ${totalDivs}, estimated cols: ${cols}`);
     
     // 先填充所有div为随机数字
     divs.forEach((div, index) => {
@@ -46,12 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 div.style.fontWeight = 'bold';
                 div.style.textShadow = '0 0 5px #00ff00';
                 div.classList.add('matrix-cell');
-                console.log(`Set div ${divIndex} to ${happyMatrix[row][col]}`);
             }
         }
     }
     
-    console.log('Matrix setup complete');
 });
 
 // 保留原有的鼠标跟随效果（简化版）

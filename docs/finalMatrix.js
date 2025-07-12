@@ -1,5 +1,4 @@
 // 最终版二进制矩阵脚本
-console.log('Final Matrix script loaded');
 
 // 定义所有单词的二进制矩阵
 const wordMatrices = {
@@ -57,21 +56,17 @@ const wordMatrices = {
 
 // 等待DOM加载完成
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded');
     
     const divs = document.querySelectorAll('section div');
-    console.log('Found divs:', divs.length);
     
-    if(divs.length === 0) {
-        console.error('No divs found in section!');
-        return;
-    }
+          if(divs.length === 0) {
+          // No divs found in section
+          return;
+      }
     
     // 根据屏幕尺寸调整网格
     const cols = window.innerWidth >= 1200 ? 18 : (window.innerWidth >= 1024 ? 16 : 14);
     const rows = window.innerWidth >= 1200 ? 12 : (window.innerWidth >= 1024 ? 11 : 10);
-    
-    console.log(`Grid: ${cols} cols x ${rows} rows`);
     
     // 计算矩阵总宽度来居中
     const totalMatrixWidth = wordMatrices.happy.length + 1 + wordMatrices.birthday.length;
@@ -91,7 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 放置矩阵的函数
     function placeMatrix(matrix, startRow, startCol, wordName) {
-        console.log(`Placing ${wordName} at row ${startRow}, col ${startCol}`);
         
         // 计算矩阵中心点
         const matrixCenterRow = startRow + 4; // 8位二进制的中心
@@ -179,7 +173,6 @@ document.addEventListener('DOMContentLoaded', function() {
         div.style.color = 'rgba(255, 255, 255, 0.4)';
     });
     
-    console.log('Matrix setup complete');
 });
 
 // 鼠标跟随效果 - 只对非矩阵元素生效

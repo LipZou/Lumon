@@ -1,5 +1,5 @@
 // 调试版二进制矩阵脚本
-console.log('Debug Matrix script loaded');
+// console.log('Debug Matrix script loaded');
 
 // 简化的矩阵数据
 const wordMatrices = {
@@ -13,20 +13,20 @@ const wordMatrices = {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded');
+    // console.log('DOM loaded');
     
     const divs = document.querySelectorAll('section div');
-    console.log('Found divs:', divs.length);
+    // console.log('Found divs:', divs.length);
     
     if(divs.length === 0) {
-        console.error('No divs found in section!');
+        // No divs found in section
         return;
     }
     
     // 根据屏幕尺寸调整网格 - 减少数量
     const cols = window.innerWidth >= 1200 ? 20 : (window.innerWidth >= 1024 ? 18 : 16);
     const rows = window.innerWidth >= 1200 ? 14 : (window.innerWidth >= 1024 ? 12 : 10);
-    console.log(`Grid: ${cols} cols x ${rows} rows, total: ${cols * rows}`);
+    // console.log(`Grid: ${cols} cols x ${rows} rows, total: ${cols * rows}`);
     
     // 先填充所有div为随机数字
     divs.forEach((div, index) => {
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // 放置HAPPY矩阵在中心位置
-    console.log('Placing HAPPY matrix...');
+    // console.log('Placing HAPPY matrix...');
     const matrix = wordMatrices.happy;
     
     // 计算居中位置
@@ -49,14 +49,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const startRow = Math.floor((rows - matrixHeight) / 2);
     const startCol = Math.floor((cols - matrixWidth) / 2);
     
-    console.log(`Matrix center position: startRow=${startRow}, startCol=${startCol}`);
-    console.log(`Matrix size: ${matrixWidth} x ${matrixHeight}`);
+    // console.log(`Matrix center position: startRow=${startRow}, startCol=${startCol}`);
+    // console.log(`Matrix size: ${matrixWidth} x ${matrixHeight}`);
     
     // 计算矩阵中心点用于放大效果
     const matrixCenterRow = startRow + matrixHeight / 2;
     const matrixCenterCol = startCol + matrixWidth / 2;
     
-    console.log(`Matrix center point: centerRow=${matrixCenterRow}, centerCol=${matrixCenterCol}`);
+    // console.log(`Matrix center point: centerRow=${matrixCenterRow}, centerCol=${matrixCenterCol}`);
     
     for(let charIndex = 0; charIndex < matrix.length; charIndex++) {
         for(let bitIndex = 0; bitIndex < matrix[charIndex].length; bitIndex++) {
@@ -92,14 +92,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 div.classList.add('matrix-cell');
-                console.log(`✅ Placed ${matrix[charIndex][bitIndex]} at (${row},${col}) divIndex=${divIndex}, scale=${scale.toFixed(2)}`);
+                // console.log(`✅ Placed ${matrix[charIndex][bitIndex]} at (${row},${col}) divIndex=${divIndex}, scale=${scale.toFixed(2)}`);
             } else {
-                console.error(`❌ Position out of bounds: row=${row}, col=${col}, divIndex=${divIndex}, divs.length=${divs.length}`);
+                                 // Position out of bounds
             }
         }
     }
     
-    console.log('Matrix placement complete');
+    // console.log('Matrix placement complete');
 });
 
 // 鼠标跟随效果 - 只对非矩阵元素生效
